@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HarshLabs.ai — AI Automation Agency</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --neon:#00FFD1;
+  --neon2:#FF2D78;
+  --neon3:#7B5EFF;
+  --bg:#04040F;
+  --card:#0A0A1F;
+}
+html,body{width:100%;height:100%;overflow-x:hidden;background:var(--bg);color:#fff;font-family:'Space Mono',monospace;}
+canvas#bg{position:fixed;top:0;left:0;z-index:0;}
+
+nav{position:fixed;top:0;width:100%;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,255,209,.08);}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:.1em;color:var(--neon);text-shadow:0 0 18px rgba(0,255,209,.6);}
+.logo span{color:var(--neon2);}
+.nav-badge{font-size:.65rem;padding:4px 10px;border:1px solid var(--neon);border-radius:20px;color:var(--neon);letter-spacing:.12em;}
+
+.hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 1rem 2rem;}
+.hero-tag{font-size:.65rem;letter-spacing:.2em;color:var(--neon);border:1px solid rgba(0,255,209,.3);padding:5px 14px;border-radius:20px;margin-bottom:1.5rem;animation:fadeUp .8s ease both;}
+.hero h1{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,6vw,4.5rem);font-weight:900;line-height:1.05;margin-bottom:1rem;animation:fadeUp .9s ease .1s both;}
+.hero h1 .accent{color:var(--neon);text-shadow:0 0 30px rgba(0,255,209,.5);}
+.hero h1 .accent2{color:var(--neon2);text-shadow:0 0 30px rgba(255,45,120,.5);}
+.hero-sub{font-size:.8rem;color:rgba(255,255,255,.5);max-width:480px;line-height:1.8;margin-bottom:2.5rem;animation:fadeUp 1s ease .2s both;letter-spacing:.05em;}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation:fadeUp 1s ease .3s both;}
+.btn-primary{background:var(--neon);color:#04040F;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;padding:12px 28px;border-radius:4px;border:none;cursor:pointer;letter-spacing:.1em;transition:all .2s;text-transform:uppercase;}
+.btn-primary:hover{box-shadow:0 0 30px rgba(0,255,209,.5);transform:translateY(-2px);}
+.btn-ghost{background:transparent;color:var(--neon2);font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;padding:12px 28px;border-radius:4px;border:1px solid var(--neon2);cursor:pointer;letter-spacing:.08em;transition:all .2s;}
+.btn-ghost:hover{background:rgba(255,45,120,.1);box-shadow:0 0 20px rgba(255,45,120,.3);}
+
+.stats{position:relative;z-index:10;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;padding:2rem 1rem;border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);margin:0 2rem;animation:fadeUp 1s ease .4s both;}
+.stat{text-align:center;}
+.stat-num{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:var(--neon);}
+.stat-label{font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.12em;margin-top:2px;}
+
+.section{position:relative;z-index:10;padding:4rem 1.5rem;max-width:1100px;margin:0 auto;}
+.section-label{font-size:.65rem;letter-spacing:.2em;color:var(--neon2);margin-bottom:.5rem;}
+.section-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.2rem,3vw,2rem);font-weight:900;margin-bottom:2.5rem;line-height:1.2;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.05);}
+.service-card{background:var(--card);padding:1.5rem;transition:all .3s;cursor:default;position:relative;overflow:hidden;}
+.service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--neon),transparent);opacity:0;transition:.3s;}
+.service-card:hover{background:#0D0D25;}
+.service-card:hover::before{opacity:1;}
+.service-icon{font-size:1.8rem;margin-bottom:1rem;display:block;}
+.service-name{font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:700;color:#fff;margin-bottom:.5rem;letter-spacing:.05em;}
+.service-desc{font-size:.65rem;color:rgba(255,255,255,.4);line-height:1.7;}
+.service-tag{display:inline-block;margin-top:.8rem;font-size:.55rem;padding:3px 8px;border-radius:2px;background:rgba(0,255,209,.08);color:var(--neon);letter-spacing:.1em;}
+
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;}
+.price-card{background:var(--card);border:1px solid rgba(255,255,255,.07);padding:1.5rem;border-radius:4px;transition:.3s;position:relative;}
+.price-card.featured{border-color:var(--neon);box-shadow:0 0 30px rgba(0,255,209,.08);}
+.price-card.featured::after{content:'POPULAR';position:absolute;top:-1px;right:1rem;background:var(--neon);color:#04040F;font-family:'Orbitron',sans-serif;font-size:.5rem;font-weight:900;padding:3px 8px;letter-spacing:.12em;}
+.price-tier{font-size:.6rem;letter-spacing:.15em;color:rgba(255,255,255,.4);margin-bottom:.5rem;}
+.price-amount{font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;color:var(--neon);margin-bottom:.2rem;}
+.price-amount span{font-size:.7rem;color:rgba(255,255,255,.5);}
+.price-desc{font-size:.62rem;color:rgba(255,255,255,.4);margin-bottom:1rem;line-height:1.6;}
+.price-features{list-style:none;}
+.price-features li{font-size:.62rem;color:rgba(255,255,255,.6);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:8px;align-items:flex-start;}
+.price-features li::before{content:'▸';color:var(--neon);flex-shrink:0;}
+
+.cta{position:relative;z-index:10;text-align:center;padding:4rem 1.5rem;border-top:1px solid rgba(255,255,255,.05);}
+.cta-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.2rem,3vw,2.2rem);font-weight:900;margin-bottom:1rem;}
+.cta-sub{font-size:.72rem;color:rgba(255,255,255,.5);margin-bottom:2rem;letter-spacing:.05em;}
+.wa-btn{display:inline-flex;align-items:center;gap:.6rem;background:#25D366;color:#fff;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;padding:14px 32px;border-radius:4px;border:none;cursor:pointer;letter-spacing:.1em;transition:all .2s;text-transform:uppercase;text-decoration:none;}
+.wa-btn:hover{box-shadow:0 0 30px rgba(37,211,102,.4);transform:translateY(-2px);}
+
+footer{position:relative;z-index:10;text-align:center;padding:1.5rem;border-top:1px solid rgba(255,255,255,.05);font-size:.6rem;color:rgba(255,255,255,.25);letter-spacing:.1em;}
+
+.scanline{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:200;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:1;}
+.orb1{width:400px;height:400px;background:rgba(0,255,209,.06);top:-100px;left:-100px;}
+.orb2{width:300px;height:300px;background:rgba(255,45,120,.06);bottom:-50px;right:-50px;}
+.orb3{width:200px;height:200px;background:rgba(123,94,255,.08);top:50%;left:50%;transform:translate(-50%,-50%);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<canvas id="bg"></canvas>
+
+<nav>
+  <div class="logo">Harsh<span>Labs</span>.ai</div>
+  <div class="nav-badge">DELHI NCR</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">◈ AI AUTOMATION AGENCY</div>
+  <h1>Automate Your<br><span class="accent">Business</span> with<br><span class="accent2">AI Power</span></h1>
+  <p class="hero-sub">WhatsApp bots · Instagram automation · Lead capture · AI creatives — built for Delhi NCR small businesses.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="window.open('https://wa.me/91XXXXXXXXXX','_blank')">Start Free Demo</button>
+    <button class="btn-ghost" onclick="document.querySelector('.stats').scrollIntoView({behavior:'smooth'})">View Services ↓</button>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">5+</div><div class="stat-label">AI SERVICES</div></div>
+  <div class="stat"><div class="stat-num">₹0</div><div class="stat-label">DEMO COST</div></div>
+  <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">BOT UPTIME</div></div>
+  <div class="stat"><div class="stat-num">NCR</div><div class="stat-label">BASED</div></div>
+</div>
+
+<section class="section">
+  <div class="section-label">// WHAT WE BUILD</div>
+  <div class="section-title">AI Services for<br>Real Businesses</div>
+  <div class="grid">
+    <div class="service-card">
+      <span class="service-icon">💬</span>
+      <div class="service-name">WhatsApp AI Bot</div>
+      <div class="service-desc">Auto-reply, lead qualify, order updates — runs 24/7 without you.</div>
+      <span class="service-tag">AUTOMATION</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">📸</span>
+      <div class="service-name">Instagram DM Bot</div>
+      <div class="service-desc">Auto-DM on story replies, reel comments, and keyword triggers.</div>
+      <span class="service-tag">GROWTH</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">🎯</span>
+      <div class="service-name">Lead Capture Bot</div>
+      <div class="service-desc">Qualify leads, collect contacts, push to Google Sheets instantly.</div>
+      <span class="service-tag">LEADS</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">🖼️</span>
+      <div class="service-name">AI Images & Videos</div>
+      <div class="service-desc">Product visuals, ads, and reels created with AI — no photographer needed.</div>
+      <span class="service-tag">CREATIVE</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">📍</span>
+      <div class="service-name">Google Business Setup</div>
+      <div class="service-desc">Full GBP setup & optimization so customers find you on Maps.</div>
+      <span class="service-tag">LOCAL SEO</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">// PRICING</div>
+  <div class="section-title">Simple. Affordable.<br>No Hidden Fees.</div>
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="price-tier">STARTER</div>
+      <div class="price-amount">₹999<span>/project</span></div>
+      <div class="price-desc">Perfect for first-time AI setup</div>
+      <ul class="price-features">
+        <li>1 AI bot setup</li>
+        <li>WhatsApp or Instagram</li>
+        <li>Basic auto-reply flows</li>
+        <li>7-day support</li>
+      </ul>
+    </div>
+    <div class="price-card featured">
+      <div class="price-tier">GROWTH</div>
+      <div class="price-amount">₹2499<span>/project</span></div>
+      <div class="price-desc">For serious business automation</div>
+      <ul class="price-features">
+        <li>WhatsApp + Instagram bot</li>
+        <li>Lead capture + Google Sheets</li>
+        <li>AI creative content pack</li>
+        <li>30-day support</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <div class="price-tier">FULL STACK</div>
+      <div class="price-amount">₹4999<span>/project</span></div>
+      <div class="price-desc">Complete AI business system</div>
+      <ul class="price-features">
+        <li>All automations included</li>
+        <li>Google Business setup</li>
+        <li>Monthly AI creatives</li>
+        <li>60-day priority support</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="cta-title">Ready to Automate?</div>
+  <div class="cta-sub">Free demo · No commitment · Delhi NCR only</div>
+  <a class="wa-btn" href="https://wa.me/91XXXXXXXXXX" target="_blank">📱 WhatsApp Karo</a>
+</div>
+
+<footer>© 2026 HARSHLABS.AI · GHAZIABAD, DELHI NCR · ALL RIGHTS RESERVED</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas = document.getElementById('bg');
+const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.z = 5;
+
+const gridHelper = new THREE.GridHelper(30, 30, 0x00FFD1, 0x0A0A1F);
+gridHelper.position.y = -3;
+gridHelper.material.opacity = 0.15;
+gridHelper.material.transparent = true;
+scene.add(gridHelper);
+
+const geo = new THREE.BufferGeometry();
+const count = 600;
+const pos = new Float32Array(count * 3);
+for(let i = 0; i < count * 3; i++) pos[i] = (Math.random() - 0.5) * 20;
+geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+const mat = new THREE.PointsMaterial({color:0x00FFD1, size:0.03, transparent:true, opacity:0.5});
+const particles = new THREE.Points(geo, mat);
+scene.add(particles);
+
+const torusGeo = new THREE.TorusGeometry(1.2, 0.015, 8, 80);
+const torusMat = new THREE.MeshBasicMaterial({color:0x00FFD1, wireframe:true, transparent:true, opacity:0.15});
+const torus = new THREE.Mesh(torusGeo, torusMat);
+torus.position.set(3, 1, -2);
+scene.add(torus);
+
+const octGeo = new THREE.OctahedronGeometry(0.6);
+const octMat = new THREE.MeshBasicMaterial({color:0xFF2D78, wireframe:true, transparent:true, opacity:0.2});
+const oct = new THREE.Mesh(octGeo, octMat);
+oct.position.set(-3.5, 0.5, -1);
+scene.add(oct);
+
+const icoGeo = new THREE.IcosahedronGeometry(0.4);
+const icoMat = new THREE.MeshBasicMaterial({color:0x7B5EFF, wireframe:true, transparent:true, opacity:0.25});
+const ico = new THREE.Mesh(icoGeo, icoMat);
+ico.position.set(2, -1.5, -1);
+scene.add(ico);
+
+let mouse = {x:0, y:0};
+window.addEventListener('mousemove', e => {
+  mouse.x = (e.clientX/window.innerWidth - 0.5) * 2;
+  mouse.y = -(e.clientY/window.innerHeight - 0.5) * 2;
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+function animate(){
+  requestAnimationFrame(animate);
+  const t = Date.now() * 0.001;
+  particles.rotation.y = t * 0.02;
+  particles.rotation.x = t * 0.01;
+  torus.rotation.x = t * 0.3;
+  torus.rotation.y = t * 0.2;
+  oct.rotation.x = t * 0.4;
+  oct.rotation.z = t * 0.3;
+  ico.rotation.y = t * 0.5;
+  ico.rotation.x = t * 0.2;
+  gridHelper.position.z = (t * 0.3) % 1;
+  camera.position.x += (mouse.x * 0.3 - camera.position.x) * 0.05;
+  camera.position.y += (mouse.y * 0.2 - camera.position.y) * 0.05;
+  camera.lookAt(scene.position);
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>

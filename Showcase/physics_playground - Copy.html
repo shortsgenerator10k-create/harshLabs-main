@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Playground — 100 Objects</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            background: #0a0a0f;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            cursor: grab;
+        }
+        body.grabbing { cursor: grabbing; }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            color: #e0e0e0;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #ui h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #ui p {
+            font-size: 0.9rem;
+            color: #888;
+            line-height: 1.5;
+            max-width: 320px;
+        }
+
+        #ui .key {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            color: #feca57;
+            margin: 0 2px;
+        }
+
+        #stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            color: #666;
+            font-size: 0.75rem;
+            font-family: monospace;
+            text-align: right;
+            pointer-events: none;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 12px;
+            pointer-events: auto;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #ccc;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(12px);
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.25);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(254,202,87,0.2));
+            border-color: rgba(255,107,107,0.3);
+            color: #ffaaa5;
+        }
+
+        .btn.primary:hover {
+            background: linear-gradient(135deg, rgba(255,107,107,0.35), rgba(254,202,87,0.35));
+            color: #ffd4d1;
+        }
+
+        #loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a0f;
+            z-index: 100;
+            color: #666;
+            font-size: 1rem;
+            transition: opacity 0.5s ease;
+        }
+
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top-color: #ff6b6b;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+
+    <!-- Import maps for modern module loading -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+        <span>Loading Physics Engine...</span>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui">
+        <h1>Physics Playground</h1>
+        <p>
+            <span class="key">Drag</span> objects to throw them around.<br>
+            <span class="key">Click</span> empty space to spawn a ball.<br>
+            <span class="key">Scroll</span> to zoom, <span class="key">Right-drag</span> to orbit.
+        </p>
+    </div>
+
+    <div id="stats">
+        <div id="fps">FPS: --</div>
+        <div id="bodies">Bodies: 0</div>
+    </div>
+
+    <div id="controls">
+        <button class="btn primary" id="btn-reset">Drop 100 Objects</button>
+        <button class="btn" id="btn-clear">Clear All</button>
+        <button class="btn" id="btn-explode">Explode!</button>
+        <button class="btn" id="btn-gravity">Toggle Gravity</button>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import * as CANNON from 'cannon-es';
+
+        // ─── Scene Setup ───────────────────────────────────────────────
+        const container = document.getElementById('canvas-container');
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0f);
+        scene.fog = new THREE.FogExp2(0x0a0a0f, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(0, 18, 28);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+        container.appendChild(renderer.domElement);
+
+        // ─── Lighting ──────────────────────────────────────────────────
+        const ambientLight = new THREE.AmbientLight(0x404060, 0.4);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(10, 25, 15);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.far = 60;
+        dirLight.shadow.camera.left = -25;
+        dirLight.shadow.camera.right = 25;
+        dirLight.shadow.camera.top = 25;
+        dirLight.shadow.camera.bottom = -25;
+        dirLight.shadow.bias = -0.0005;
+        scene.add(dirLight);
+
+        const fillLight = new THREE.DirectionalLight(0x6b8cff, 0.3);
+        fillLight.position.set(-15, 10, -10);
+        scene.add(fillLight);
+
+        const rimLight = new THREE.PointLight(0xff6b6b, 0.5, 40);
+        rimLight.position.set(0, 5, -15);
+        scene.add(rimLight);
+
+        // ─── Physics World ─────────────────────────────────────────────
+        const world = new CANNON.World({
+            gravity: new CANNON.Vec3(0, -15, 0),
+        });
+        world.broadphase = new CANNON.SAPBroadphase(world);
+        world.allowSleep = true;
+        world.solver.iterations = 10;
+
+        // Materials
+        const defaultMaterial = new CANNON.Material('default');
+        const defaultContact = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, {
+            friction: 0.35,
+            restitution: 0.5,
+        });
+        world.addContactMaterial(defaultContact);
+
+        // ─── Ground ──────────────────────────────────────────────────
+        const groundShape = new CANNON.Plane();
+        const groundBody = new CANNON.Body({
+            mass: 0,
+            material: defaultMaterial,
+        });
+        groundBody.addShape(groundShape);
+        groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+        world.addBody(groundBody);
+
+        // Visual ground
+        const groundGeo = new THREE.PlaneGeometry(80, 80);
+        const groundMat = new THREE.MeshStandardMaterial({
+            color: 0x111118,
+            roughness: 0.8,
+            metalness: 0.1,
+        });
+        const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+        groundMesh.rotation.x = -Math.PI / 2;
+        groundMesh.receiveShadow = true;
+        scene.add(groundMesh);
+
+        // Grid helper for visual depth
+        const gridHelper = new THREE.GridHelper(80, 80, 0x222233, 0x15151c);
+        gridHelper.position.y = 0.01;
+        scene.add(gridHelper);
+
+        // Invisible walls to keep objects in play area
+        function createWall(x, z, rotY) {
+            const wallShape = new CANNON.Box(new CANNON.Vec3(20, 15, 0.5));
+            const wallBody = new CANNON.Body({ mass: 0, material: defaultMaterial });
+            wallBody.addShape(wallShape);
+            wallBody.position.set(x, 7.5, z);
+            wallBody.quaternion.setFromEuler(0, rotY, 0);
+            world.addBody(wallBody);
+        }
+        createWall(0, -20, 0);
+        createWall(0, 20, 0);
+        createWall(-20, 0, Math.PI / 2);
+        createWall(20, 0, Math.PI / 2);
+
+        // ─── Object Management ───────────────────────────────────────
+        const objects = []; // { mesh, body, type }
+        const colors = [
+            0xff6b6b, 0xfeca57, 0x48dbfb, 0xff9ff3,
+            0x54a0ff, 0x5f27cd, 0x00d2d3, 0xff9f43,
+            0xee5a24, 0x009432, 0x0652dd, 0x9980fa,
+        ];
+
+        function getRandomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function createBox(x, y, z) {
+            const w = 0.8 + Math.random() * 1.2;
+            const h = 0.8 + Math.random() * 1.2;
+            const d = 0.8 + Math.random() * 1.2;
+
+            const shape = new CANNON.Box(new CANNON.Vec3(w/2, h/2, d/2));
+            const body = new CANNON.Body({
+                mass: w * h * d * 2,
+                material: defaultMaterial,
+                position: new CANNON.Vec3(x, y, z),
+            });
+            body.addShape(shape);
+            body.linearDamping = 0.1;
+            body.angularDamping = 0.1;
+            world.addBody(body);
+
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshStandardMaterial({
+                color: getRandomColor(),
+                roughness: 0.3,
+                metalness: 0.1,
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+
+            const obj = { mesh, body, type: 'box' };
+            objects.push(obj);
+            return obj;
+        }
+
+        function createSphere(x, y, z) {
+            const r = 0.5 + Math.random() * 0.8;
+
+            const shape = new CANNON.Sphere(r);
+            const body = new CANNON.Body({
+                mass: (4/3) * Math.PI * r * r * r * 2,
+                material: defaultMaterial,
+                position: new CANNON.Vec3(x, y, z),
+            });
+            body.addShape(shape);
+            body.linearDamping = 0.05;
+            body.angularDamping = 0.05;
+            world.addBody(body);
+
+            const geo = new THREE.SphereGeometry(r, 32, 32);
+            const mat = new THREE.MeshStandardMaterial({
+                color: getRandomColor(),
+                roughness: 0.2,
+                metalness: 0.15,
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+
+            const obj = { mesh, body, type: 'sphere' };
+            objects.push(obj);
+            return obj;
+        }
+
+        function createCapsule(x, y, z) {
+            const r = 0.4 + Math.random() * 0.4;
+            const h = 1.0 + Math.random() * 1.5;
+
+            // Cannon cylinder + 2 spheres
+            const shape = new CANNON.Cylinder(r, r, h, 12);
+            const body = new CANNON.Body({
+                mass: Math.PI * r * r * h * 2,
+                material: defaultMaterial,
+                position: new CANNON.Vec3(x, y, z),
+            });
+            body.addShape(shape, new CANNON.Vec3(0, 0, 0), new CANNON.Quaternion().setFromEuler(Math.PI/2, 0, 0));
+            body.linearDamping = 0.1;
+            body.angularDamping = 0.1;
+            world.addBody(body);
+
+            // Visual: capsule geometry
+            const geo = new THREE.CapsuleGeometry(r, h, 8, 16);
+            const mat = new THREE.MeshStandardMaterial({
+                color: getRandomColor(),
+                roughness: 0.35,
+                metalness: 0.1,
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+
+            const obj = { mesh, body, type: 'capsule' };
+            objects.push(obj);
+            return obj;
+        }
+
+        function spawnObject(x, y, z) {
+            const r = Math.random();
+            if (r < 0.4) return createBox(x, y, z);
+            if (r < 0.75) return createSphere(x, y, z);
+            return createCapsule(x, y, z);
+        }
+
+        function dropObjects(count = 100) {
+            for (let i = 0; i < count; i++) {
+                const x = (Math.random() - 0.5) * 16;
+                const z = (Math.random() - 0.5) * 16;
+                const y = 5 + Math.random() * 20 + (i * 0.15);
+                spawnObject(x, y, z);
+            }
+            updateStats();
+        }
+
+        function clearObjects() {
+            objects.forEach(obj => {
+                world.removeBody(obj.body);
+                scene.remove(obj.mesh);
+                obj.mesh.geometry.dispose();
+                obj.mesh.material.dispose();
+            });
+            objects.length = 0;
+            updateStats();
+        }
+
+        function explode() {
+            objects.forEach(obj => {
+                const force = new CANNON.Vec3(
+                    (Math.random() - 0.5) * 800,
+                    300 + Math.random() * 500,
+                    (Math.random() - 0.5) * 800
+                );
+                obj.body.applyImpulse(force, obj.body.position);
+                obj.body.wakeUp();
+            });
+        }
+
+        let gravityOn = true;
+        function toggleGravity() {
+            gravityOn = !gravityOn;
+            world.gravity.set(0, gravityOn ? -15 : 0, 0);
+            objects.forEach(obj => obj.body.wakeUp());
+        }
+
+        // ─── Mouse Interaction (Drag) ─────────────────────────────────
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let hoveredObj = null;
+        let draggedObj = null;
+        let dragConstraint = null;
+        let dragBody = null;
+        let dragPlane = null;
+
+        // Create an invisible kinematic body for dragging
+        dragBody = new CANNON.Body({ mass: 0, type: CANNON.Body.KINEMATIC });
+        dragBody.collisionFilterGroup = 0; // Don't collide with anything
+        world.addBody(dragBody);
+
+        function getRayIntersection(clientX, clientY) {
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const meshes = objects.map(o => o.mesh);
+            const intersects = raycaster.intersectObjects(meshes);
+            if (intersects.length > 0) {
+                const mesh = intersects[0].object;
+                const obj = objects.find(o => o.mesh === mesh);
+                return { obj, point: intersects[0].point };
+            }
+            return null;
+        }
+
+        function startDrag(obj, point) {
+            if (!obj) return;
+
+            draggedObj = obj;
+            obj.body.wakeUp();
+
+            // Create a point-to-point constraint
+            const localPivot = new CANNON.Vec3(
+                point.x - obj.body.position.x,
+                point.y - obj.body.position.y,
+                point.z - obj.body.position.z
+            );
+
+            dragConstraint = new CANNON.PointToPointConstraint(
+                obj.body, localPivot,
+                dragBody, new CANNON.Vec3(0, 0, 0)
+            );
+            world.addConstraint(dragConstraint);
+
+            // Visual feedback
+            obj.mesh.material.emissive.setHex(0x333333);
+            document.body.classList.add('grabbing');
+        }
+
+        function updateDrag(clientX, clientY) {
+            if (!draggedObj) return;
+
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            // Project ray onto a plane at the object's depth
+            const targetZ = draggedObj.body.position.z;
+            const dist = (targetZ - camera.position.z) / raycaster.ray.direction.z;
+            const point = raycaster.ray.origin.clone().add(
+                raycaster.ray.direction.clone().multiplyScalar(dist)
+            );
+
+            dragBody.position.set(point.x, point.y, targetZ);
+        }
+
+        function endDrag() {
+            if (draggedObj) {
+                if (dragConstraint) {
+                    world.removeConstraint(dragConstraint);
+                    dragConstraint = null;
+                }
+                draggedObj.mesh.material.emissive.setHex(0x000000);
+                draggedObj = null;
+            }
+            document.body.classList.remove('grabbing');
+        }
+
+        // ─── Event Listeners ─────────────────────────────────────────
+        let isLeftDown = false;
+        let isRightDown = false;
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                isLeftDown = true;
+                const hit = getRayIntersection(e.clientX, e.clientY);
+                if (hit) {
+                    startDrag(hit.obj, hit.point);
+                    e.preventDefault();
+                }
+            } else if (e.button === 2) {
+                isRightDown = true;
+            }
+        });
+
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            if (draggedObj) {
+                updateDrag(e.clientX, e.clientY);
+            } else {
+                // Hover effect
+                const hit = getRayIntersection(e.clientX, e.clientY);
+                if (hit && hit.obj !== hoveredObj) {
+                    if (hoveredObj) hoveredObj.mesh.material.emissive.setHex(0x000000);
+                    hoveredObj = hit.obj;
+                    hoveredObj.mesh.material.emissive.setHex(0x222222);
+                    document.body.style.cursor = 'grab';
+                } else if (!hit && hoveredObj) {
+                    hoveredObj.mesh.material.emissive.setHex(0x000000);
+                    hoveredObj = null;
+                    document.body.style.cursor = 'default';
+                }
+            }
+        });
+
+        renderer.domElement.addEventListener('mouseup', (e) => {
+            if (e.button === 0) {
+                isLeftDown = false;
+                endDrag();
+            } else if (e.button === 2) {
+                isRightDown = false;
+            }
+        });
+
+        renderer.domElement.addEventListener('click', (e) => {
+            if (e.button !== 0) return;
+            const hit = getRayIntersection(e.clientX, e.clientY);
+            if (!hit) {
+                // Click on empty space → spawn a ball
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+                const target = new THREE.Vector3();
+                raycaster.ray.intersectPlane(plane, target);
+                if (target) {
+                    createSphere(target.x, 15, target.z);
+                    updateStats();
+                }
+            }
+        });
+
+        renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Orbit controls (right-click drag)
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enablePan = false;
+        controls.minDistance = 5;
+        controls.maxDistance = 60;
+        controls.maxPolarAngle = Math.PI / 2 - 0.05;
+        controls.mouseButtons = {
+            LEFT: null,
+            MIDDLE: null,
+            RIGHT: THREE.MOUSE.ROTATE
+        };
+
+        // ─── UI Buttons ──────────────────────────────────────────────
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            clearObjects();
+            setTimeout(() => dropObjects(100), 100);
+        });
+
+        document.getElementById('btn-clear').addEventListener('click', clearObjects);
+        document.getElementById('btn-explode').addEventListener('click', explode);
+        document.getElementById('btn-gravity').addEventListener('click', toggleGravity);
+
+        function updateStats() {
+            document.getElementById('bodies').textContent = `Bodies: ${objects.length}`;
+        }
+
+        // ─── Animation Loop ──────────────────────────────────────────
+        const clock = new THREE.Clock();
+        let lastFpsTime = 0;
+        let frameCount = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = Math.min(clock.getDelta(), 0.05);
+
+            // Step physics
+            world.step(1 / 60, dt, 3);
+
+            // Sync meshes with bodies
+            objects.forEach(obj => {
+                obj.mesh.position.copy(obj.body.position);
+                obj.mesh.quaternion.copy(obj.body.quaternion);
+
+                // Remove objects that fall off the world
+                if (obj.body.position.y < -30) {
+                    world.removeBody(obj.body);
+                    scene.remove(obj.mesh);
+                    obj.mesh.geometry.dispose();
+                    obj.mesh.material.dispose();
+                    const idx = objects.indexOf(obj);
+                    if (idx > -1) objects.splice(idx, 1);
+                    updateStats();
+                }
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+
+            // FPS counter
+            frameCount++;
+            const now = performance.now();
+            if (now - lastFpsTime >= 1000) {
+                document.getElementById('fps').textContent = `FPS: ${frameCount}`;
+                frameCount = 0;
+                lastFpsTime = now;
+            }
+        }
+
+        // ─── Resize Handler ────────────────────────────────────────────
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ─── Init ────────────────────────────────────────────────────
+        document.getElementById('loading').classList.add('hidden');
+        dropObjects(100);
+        animate();
+    </script>
+</body>
+</html>

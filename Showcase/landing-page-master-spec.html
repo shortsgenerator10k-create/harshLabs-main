@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Landing Page Master Spec — Vibe Coding Blueprint</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f9f7f4;
+  --white: #ffffff;
+  --ink: #0f0f0f;
+  --ink-soft: #6b6b6b;
+  --ink-mute: #b0aca6;
+  --accent: #1a1aff;
+  --accent2: #ff3b30;
+  --accent3: #00c46a;
+  --accent4: #ff9500;
+  --border: #e8e4df;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 48px rgba(0,0,0,0.1);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LAYOUT ── */
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+}
+
+/* ── COVER ── */
+.cover {
+  padding: 5rem 0 4rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4rem;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: 'SPEC';
+  position: absolute;
+  right: -2rem;
+  top: 2rem;
+  font-family: 'DM Serif Display', serif;
+  font-size: 14rem;
+  color: rgba(0,0,0,0.03);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.cover-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ink);
+  color: var(--white);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.9rem;
+  border-radius: 2px;
+  margin-bottom: 2rem;
+  font-family: 'DM Mono', monospace;
+}
+.cover-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--accent3);
+  border-radius: 50%;
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.cover-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  max-width: 700px;
+}
+.cover-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.cover-sub {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  max-width: 540px;
+  line-height: 1.75;
+  margin-bottom: 2.5rem;
+}
+
+.cover-meta {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.meta-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-family: 'DM Mono', monospace;
+}
+.meta-val {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* ── SECTION ── */
+.spec-section {
+  margin-bottom: 3.5rem;
+  padding-bottom: 3.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.spec-section:last-child { border-bottom: none; }
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.section-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  padding-top: 0.4rem;
+  flex-shrink: 0;
+  width: 28px;
+}
+.section-title-wrap {}
+.section-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 0.3rem;
+}
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.9rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+/* ── DECISION CARD ── */
+.decision {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.25rem;
+  align-items: flex-start;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.decision:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.decision-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.decision-body {}
+.decision-q {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 0.3rem;
+}
+.decision-a {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.decision-why {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+.decision-impact {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  padding: 0.25rem 0.6rem;
+  border-radius: 2px;
+  white-space: nowrap;
+  align-self: flex-start;
+  margin-top: 0.15rem;
+}
+.impact-high { background: rgba(255,59,48,0.08); color: var(--accent2); }
+.impact-med { background: rgba(26,26,255,0.07); color: var(--accent); }
+.impact-sub { background: rgba(0,196,106,0.08); color: var(--accent3); }
+
+/* ── SECTION INSIGHT ── */
+.insight {
+  background: var(--ink);
+  color: var(--white);
+  padding: 1.5rem 2rem;
+  border-radius: 4px;
+  margin-top: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.insight::before {
+  content: '→';
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 3rem;
+  color: rgba(255,255,255,0.06);
+  font-family: 'DM Serif Display', serif;
+}
+.insight-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.5rem;
+}
+.insight-text {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.85);
+  max-width: 620px;
+}
+.insight-text strong { color: var(--white); }
+
+/* ── PAGE BLUEPRINT ── */
+.blueprint {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.blueprint-header {
+  background: var(--ink);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.blueprint-header span { color: rgba(255,255,255,0.3); }
+
+.bp-section {
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 200px 1fr;
+}
+.bp-section:last-child { border-bottom: none; }
+.bp-label {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.bp-pos {
+  font-size: 0.6rem;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.bp-content {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.65;
+}
+.bp-content ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.bp-content ul li::before {
+  content: '·';
+  color: var(--accent);
+  margin-right: 0.5rem;
+  font-weight: 700;
+}
+.bp-tag {
+  display: inline-block;
+  background: rgba(26,26,255,0.06);
+  color: var(--accent);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+  margin-left: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.bp-tag.red { background: rgba(255,59,48,0.06); color: var(--accent2); }
+.bp-tag.green { background: rgba(0,196,106,0.06); color: var(--accent3); }
+
+/* ── PSYCHOLOGY MAP ── */
+.psych-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.psych-cell {
+  background: var(--white);
+  padding: 1.5rem;
+}
+.psych-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+.psych-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.psych-body {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+.psych-trigger {
+  margin-top: 0.75rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── CHECKLIST ── */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.check-item {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  padding: 1rem 1.25rem 1rem 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+  transition: background 0.15s;
+  gap: 1rem;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item:hover { background: var(--bg); }
+.check-box {
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.check-icon {
+  width: 20px; height: 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--accent3);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.check-icon.done {
+  background: var(--accent3);
+  border-color: var(--accent3);
+  color: white;
+}
+.check-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.check-sub {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin-top: 0.15rem;
+}
+.check-cat {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── COLOUR SYSTEM ── */
+.colour-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.colour-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 100px;
+}
+.chip-swatch {
+  height: 56px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+.chip-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.chip-role {
+  font-size: 0.65rem;
+  color: var(--ink-mute);
+}
+
+/* ── FONT PAIR ── */
+.font-demo {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.font-row {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 2rem;
+  align-items: center;
+}
+.font-row:last-child { border-bottom: none; }
+.font-sample-display {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.5rem;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.font-sample-display em { font-style: italic; color: var(--accent); }
+.font-sample-body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.font-meta { text-align: right; }
+.font-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 0.2rem;
+}
+.font-use {
+  font-size: 0.7rem;
+  color: var(--ink-mute);
+}
+
+/* ── CONVERSION PATH ── */
+.conv-path {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 1.5rem;
+  overflow-x: auto;
+}
+.conv-step {
+  flex: 1;
+  min-width: 130px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-right: none;
+  padding: 1.25rem 1rem;
+  position: relative;
+  transition: background 0.2s;
+}
+.conv-step:last-child { border-right: 1px solid var(--border); }
+.conv-step:hover { background: var(--bg); }
+.conv-step::after {
+  content: '›';
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: var(--ink-mute);
+  z-index: 1;
+  background: var(--white);
+  padding: 0 2px;
+  line-height: 1;
+}
+.conv-step:last-child::after { display: none; }
+.conv-n {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+.conv-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+.conv-desc {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.conv-emotion {
+  margin-top: 0.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--accent);
+}
+
+/* ── SCROLL FEEL ── */
+.scroll-viz {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+.scroll-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.scroll-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.scroll-connector {
+  flex: 1;
+  width: 1px;
+  min-height: 40px;
+}
+.scroll-moments {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.scroll-moment {
+  padding-bottom: 2rem;
+  position: relative;
+}
+.scroll-moment:last-child { padding-bottom: 0; }
+.sm-section {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+.sm-action {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.2rem;
+}
+.sm-feel {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+.sm-trust {
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── FINAL RULE ── */
+.final-rule {
+  background: var(--ink);
+  color: var(--white);
+  padding: 3rem 2.5rem;
+  border-radius: 4px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.final-rule::before {
+  content: '"';
+  position: absolute;
+  font-family: 'DM Serif Display', serif;
+  font-size: 20rem;
+  color: rgba(255,255,255,0.03);
+  top: -4rem;
+  left: 1rem;
+  line-height: 1;
+}
+.final-q {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 1.5rem;
+}
+.final-text {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  line-height: 1.3;
+  font-style: italic;
+  color: var(--white);
+  max-width: 640px;
+  margin: 0 auto 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+.final-sub {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 640px) {
+  .page { padding: 0 1rem 4rem; }
+  .psych-grid { grid-template-columns: 1fr; }
+  .decision { grid-template-columns: auto 1fr; }
+  .decision-impact { display: none; }
+  .bp-section { grid-template-columns: 1fr; }
+  .bp-label { border-right: none; border-bottom: 1px solid var(--border); }
+  .font-row { grid-template-columns: 1fr; }
+  .font-meta { text-align: left; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="cover-tag">Vibe Coding Blueprint · v1.0</div>
+    <h1 class="cover-title">The <em>Master Spec</em><br/>Before One Line of Code</h1>
+    <p class="cover-sub">Every decision that shapes whether a warm lead stays, trusts, and shares — extracted from your answers and mapped into a complete pre-build specification for your landing page.</p>
+    <div class="cover-meta">
+      <div class="meta-item">
+        <span class="meta-label">Audience</span>
+        <span class="meta-val">Warm referred leads</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Primary Device</span>
+        <span class="meta-val">Mobile + Desktop equally</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Trust Model</span>
+        <span class="meta-val">Gain · Proof · Authority</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Goal</span>
+        <span class="meta-val">They share it</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Decision Window</span>
+        <span class="meta-val">Under 3 seconds</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 AUDIENCE LAYER -->
+  <div class="spec-section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-title-wrap">
+        <div class="section-label">Audience Layer</div>
+        <h2 class="section-title">Who lands. What they carry.</h2>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="decision-icon" style="background:rgba(0,196,106,0.1);">🤝</div>
+      <div class="decision-body">
+        <div class="decision-q">Visitor Type</div>
+        <div class="decision-a">Warm referred lead</div>
+        <div class="decision-why">They already have pre-trust from whoever sent them. The page's job is not to convince — it's to <strong>confirm</strong>. They're looking for one thing: "Does this match what I was told?" Your design must not break that expectation in the first 3 seconds.</div>
+      </div>
+      <div class="decision-impact impact-high">Critical</div>
+    </div>
+
+    <div class="decision">
+      <div class="decision-icon" style="background:rgba(26,26,255,0.08);">📱</div>
+      <div class="decision-body">
+        <div class="decision-q">Primary Device</div>
+        <div class="decision-a">Mobile + Desktop equally</div>
+        <div class="decision-why">This means no half-measures. Every layout, font size, touch target (min 44px), hover state, and scroll interaction must be designed twice — not adapted once. Mobile gets thumb-zone CTAs. Desktop gets mouse micro-interactions. Neither is an afterthought.</div>
+      </div>
+      <div class="decision-impact impact-high">Critical</div>
+    </div>
+
+    <div class="decision">
+      <div class="decision-icon" style="background:rgba(255,149,0,0.1);">⚡</div>
+      <div class="decision-body">
+        <div class="decision-q">Attention Window</div>
+        <div class="decision-a">Under 3 seconds or they leave</div>
+        <div class="decision-why">The hero section is the only section that matters first. Above the fold must contain: what it is, who it's for, and one visual signal of credibility. No loading animations. No splash screens. No intro text that builds up slowly. Immediate pattern recognition.</div>
+      </div>
+      <div class="decision-impact impact-high">Critical</div>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">Layer Insight</div>
+      <div class="insight-text">A warm lead with 3 seconds is not a cold lead with 30 seconds. They enter <strong>ready to say yes</strong> — your only risk is doing something that makes them say no. Design for confirmation, not persuasion.</div>
+    </div>
+  </div>
+
+  <!-- 02 PSYCHOLOGY LAYER -->
+  <div class="spec-section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div class="section-title-wrap">
+        <div class="section-label">Psychology Layer</div>
+        <h2 class="section-title">What moves them. Where to place it.</h2>
+      </div>
+    </div>
+
+    <div class="psych-grid">
+      <div class="psych-cell">
+        <div class="psych-num">DRIVER 01</div>
+        <div class="psych-title">Desire for Gain</div>
+        <div class="psych-body">Show the transformation, not the service. Not "I build landing pages" — "Your idea becomes a working product today." Lead with the after, not the during.</div>
+        <div class="psych-trigger">→ Trigger: outcome-first headlines</div>
+      </div>
+      <div class="psych-cell">
+        <div class="psych-num">DRIVER 02</div>
+        <div class="psych-title">Social Proof</div>
+        <div class="psych-body">Real faces + recognisable logos. The brain pattern-matches instantly — "people like me trusted this." Photos must feel authentic, never stock. Logos must be ones the visitor has heard of.</div>
+        <div class="psych-trigger">→ Trigger: faces above logos always</div>
+      </div>
+      <div class="psych-cell">
+        <div class="psych-num">DRIVER 03</div>
+        <div class="psych-title">Authority Signal</div>
+        <div class="psych-body">Numbers, credentials, and specificity. "127 projects delivered" beats "many projects." Specificity signals honesty. Vagueness signals insecurity. Every number must be real and exact.</div>
+        <div class="psych-trigger">→ Trigger: specific numbers everywhere</div>
+      </div>
+      <div class="psych-cell">
+        <div class="psych-num">PLACEMENT</div>
+        <div class="psych-title">Curiosity → Data</div>
+        <div class="psych-body">Build curiosity first in the hero (withhold the full picture), then land the data section that kills all remaining doubt. The sequence: intrigue → interest → proof → action.</div>
+        <div class="psych-trigger">→ Pattern: hook first, stats after scroll</div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">Layer Insight</div>
+      <div class="insight-text">Gain + Proof + Authority is the <strong>exact trust stack</strong> Apple uses. The order matters: desire must come before proof. Proof must come before authority. You can't lead with credentials — you lead with what they want, then prove you can deliver it.</div>
+    </div>
+  </div>
+
+  <!-- 03 PAGE BLUEPRINT -->
+  <div class="spec-section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div class="section-title-wrap">
+        <div class="section-label">Page Architecture</div>
+        <h2 class="section-title">Section by section. Pixel by pixel.</h2>
+      </div>
+    </div>
+
+    <div class="blueprint">
+      <div class="blueprint-header">
+        Page Blueprint — Scroll Order <span>top → bottom</span>
+      </div>
+
+      <div class="bp-section">
+        <div class="bp-label">
+          <div class="bp-pos">Section 01 · Above Fold</div>
+          HERO
+        </div>
+        <div class="bp-content">
+          <ul>
+            <li>Outcome-first headline — what they gain, not what you do <span class="bp-tag red">3 sec rule</span></li>
+            <li>One sub-headline that speaks to the referred person specifically</li>
+            <li>Single CTA button — bold, unmissable, no secondary option</li>
+            <li>One authority micro-signal (e.g. "127 projects · 4.9★") tucked under CTA</li>
+            <li>NO navigation links — remove all escape routes above fold</li>
+            <li>Visual that shows the result, not the process</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bp-section">
+        <div class="bp-label">
+          <div class="bp-pos">Section 02 · Just Below</div>
+          SOCIAL PROOF BAR
+        </div>
+        <div class="bp-content">
+          <ul>
+            <li>3–5 real client photos with first name + outcome in one line <span class="bp-tag">faces first</span></li>
+            <li>Brand logos of recognisable clients beneath the faces</li>
+            <li>Scrolling/animated strip — motion signals liveness and volume</li>
+            <li>This section grants subconscious permission to keep scrolling</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bp-section">
+        <div class="bp-label">
+          <div class="bp-pos">Section 03</div>
+          CURIOSITY HOOK
+        </div>
+        <div class="bp-content">
+          <ul>
+            <li>A bold statement or question that withholds the full answer</li>
+            <li>Example: "Most freelancers take 2 weeks. Here's why mine take 2 days."</li>
+            <li>This is the scroll trigger — it creates a gap the brain must close</li>
+            <li>No data here yet — pure intrigue, then lead into proof section</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bp-section">
+        <div class="bp-label">
+          <div class="bp-pos">Section 04</div>
+          DATA / AUTHORITY
+        </div>
+        <div class="bp-content">
+          <ul>
+            <li>3–4 specific numbers: projects, speed, rating, countries <span class="bp-tag">specificity = trust</span></li>
+            <li>Authority woven in: "As seen in / Used by / Trusted by"</li>
+            <li>Short 1-line credential beneath each stat</li>
+            <li>Background: slightly different from page to signal a new zone</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bp-section">
+        <div class="bp-label">
+          <div class="bp-pos">Section 05</div>
+          SERVICES / OFFER
+        </div>
+        <div class="bp-content">
+          <ul>
+            <li>Named as outcomes, not deliverables — "Your page live in 24hrs" not "Landing Page"</li>
+            <li>Price visible — hiding price destroys trust with warm leads</li>
+            <li>3 options max — paradox of choice kills conversion</li>
+            <li>Authority woven in: delivery time, revision policy, guarantee</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bp-section">
+        <div class="bp-label">
+          <div class="bp-pos">Section 06</div>
+          MICRO-YES FORM
+        </div>
+        <div class="bp-content">
+          <ul>
+            <li>Stage 1: Ask only ONE thing — email or "what do you need?" <span class="bp-tag green">two-stage</span></li>
+            <li>CTA on stage 1: "Show me how" or "Start here" — not "Submit"</li>
+            <li>Stage 2: Full form appears after micro-yes — name, details, date</li>
+            <li>Progress bar visible — people finish what they start</li>
+            <li>Trust line beneath form: "No spam · Replied within 2 hours"</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bp-section">
+        <div class="bp-label">
+          <div class="bp-pos">Section 07 · Final</div>
+          SHARE TRIGGER
+        </div>
+        <div class="bp-content">
+          <ul>
+            <li>A line so good they screenshot it — the "sticky quote"</li>
+            <li>"The simpler you explain it, the faster you get it. Every time."</li>
+            <li>Share buttons — but framed as "Send this to someone who needs it"</li>
+            <li>This is the viral loop — the page's hidden growth engine</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 MOTION LAYER -->
+  <div class="spec-section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div class="section-title-wrap">
+        <div class="section-label">Motion & Interaction Layer</div>
+        <h2 class="section-title">How it moves. What it signals.</h2>
+      </div>
+    </div>
+
+    <div class="scroll-viz">
+      <div class="scroll-line">
+        <div class="scroll-dot" style="background:var(--accent);"></div>
+        <div class="scroll-connector" style="background:linear-gradient(var(--accent),var(--accent2));"></div>
+        <div class="scroll-dot" style="background:var(--accent2);"></div>
+        <div class="scroll-connector" style="background:linear-gradient(var(--accent2),var(--accent3));"></div>
+        <div class="scroll-dot" style="background:var(--accent3);"></div>
+        <div class="scroll-connector" style="background:linear-gradient(var(--accent3),var(--accent4));"></div>
+        <div class="scroll-dot" style="background:var(--accent4);"></div>
+        <div class="scroll-connector" style="background:linear-gradient(var(--accent4),var(--ink-mute));"></div>
+        <div class="scroll-dot" style="background:var(--ink-mute);"></div>
+      </div>
+      <div class="scroll-moments">
+        <div class="scroll-moment">
+          <div class="sm-section">Hero · 0–300px</div>
+          <div class="sm-action">Fade up stagger — headline, sub, CTA appear 80ms apart</div>
+          <div class="sm-feel">Feels: controlled, premium, intentional</div>
+          <div class="sm-trust" style="color:var(--accent);">Signal: "This person knows what they're doing"</div>
+        </div>
+        <div class="scroll-moment">
+          <div class="sm-section">Proof Bar · on scroll enter</div>
+          <div class="sm-action">Horizontal slide-in from left — logos glide into place</div>
+          <div class="sm-feel">Feels: lively, social, real</div>
+          <div class="sm-trust" style="color:var(--accent2);">Signal: "Others are here too — I'm not alone"</div>
+        </div>
+        <div class="scroll-moment">
+          <div class="sm-section">Stats · counter animation</div>
+          <div class="sm-action">Numbers count up from 0 when section enters viewport</div>
+          <div class="sm-feel">Feels: earned, proven, data-backed</div>
+          <div class="sm-trust" style="color:var(--accent3);">Signal: "These numbers are real — they had to be counted"</div>
+        </div>
+        <div class="scroll-moment">
+          <div class="sm-section">Services · hover state</div>
+          <div class="sm-action">Card lifts 4px, border accent slides in from left, price highlights</div>
+          <div class="sm-feel">Feels: responsive, interactive, modern</div>
+          <div class="sm-trust" style="color:var(--accent4);">Signal: "This was built with care"</div>
+        </div>
+        <div class="scroll-moment">
+          <div class="sm-section">Form · micro-interaction</div>
+          <div class="sm-action">Input border glows on focus, button pulses gently at rest</div>
+          <div class="sm-feel">Feels: safe, guided, low-friction</div>
+          <div class="sm-trust" style="color:var(--ink-mute);">Signal: "This is easy — I can do this"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight" style="margin-top:1.5rem;">
+      <div class="insight-label">Motion Rule</div>
+      <div class="insight-text"><strong>Smooth + minimal with intriguing moments.</strong> No animation runs longer than 400ms. No element bounces. Every motion has a purpose: reveal, emphasise, or guide. If it doesn't do one of those three — it doesn't exist.</div>
+    </div>
+  </div>
+
+  <!-- 05 VISUAL SYSTEM -->
+  <div class="spec-section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div class="section-title-wrap">
+        <div class="section-label">Visual System</div>
+        <h2 class="section-title">Colour, type, space. The trust signals.</h2>
+      </div>
+    </div>
+
+    <div class="colour-row">
+      <div class="colour-chip">
+        <div class="chip-swatch" style="background:#ffffff; border:1px solid #e8e4df;"></div>
+        <div class="chip-name">#FFFFFF</div>
+        <div class="chip-role">Base · Trustworthy white</div>
+      </div>
+      <div class="colour-chip">
+        <div class="chip-swatch" style="background:#f9f7f4;"></div>
+        <div class="chip-name">#F9F7F4</div>
+        <div class="chip-role">Background · Warm calm</div>
+      </div>
+      <div class="colour-chip">
+        <div class="chip-swatch" style="background:#0f0f0f;"></div>
+        <div class="chip-name">#0F0F0F</div>
+        <div class="chip-role">Ink · Authority black</div>
+      </div>
+      <div class="colour-chip">
+        <div class="chip-swatch" style="background:#1a1aff;"></div>
+        <div class="chip-name">#1A1AFF</div>
+        <div class="chip-role">Accent · Action blue</div>
+      </div>
+      <div class="colour-chip">
+        <div class="chip-swatch" style="background:#00c46a;"></div>
+        <div class="chip-name">#00C46A</div>
+        <div class="chip-role">Signal · Success green</div>
+      </div>
+      <div class="colour-chip">
+        <div class="chip-swatch" style="background:#6b6b6b;"></div>
+        <div class="chip-name">#6B6B6B</div>
+        <div class="chip-role">Secondary · Soft text</div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem;">
+      <div class="font-demo">
+        <div class="font-row">
+          <div class="font-sample-display">You describe it.<br/><em>I build it.</em></div>
+          <div class="font-meta">
+            <div class="font-name">DM Serif Display</div>
+            <div class="font-use">Headlines · Hero · Pull quotes</div>
+          </div>
+        </div>
+        <div class="font-row">
+          <div class="font-sample-body">The simpler and clearer you explain what you want, the faster and better the result — every single time. No technical knowledge needed.</div>
+          <div class="font-meta">
+            <div class="font-name">DM Sans</div>
+            <div class="font-use">Body · UI · Navigation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight" style="margin-top:1.5rem;">
+      <div class="insight-label">Space Rule</div>
+      <div class="insight-text"><strong>Density with purpose.</strong> Every pixel earns its place — but white space is not emptiness, it's confidence. Sections breathe. Content clusters tightly within sections. The contrast between dense and open creates the rhythm that keeps eyes moving down.</div>
+    </div>
+  </div>
+
+  <!-- 06 CONVERSION PATH -->
+  <div class="spec-section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div class="section-title-wrap">
+        <div class="section-label">Conversion Architecture</div>
+        <h2 class="section-title">The path from landing to yes.</h2>
+      </div>
+    </div>
+
+    <div class="conv-path">
+      <div class="conv-step">
+        <div class="conv-n">01</div>
+        <div class="conv-name">Land</div>
+        <div class="conv-desc">Referred lead arrives. Hero confirms expectation instantly.</div>
+        <div class="conv-emotion">Feeling: "Yes, this is it"</div>
+      </div>
+      <div class="conv-step">
+        <div class="conv-n">02</div>
+        <div class="conv-name">Scroll</div>
+        <div class="conv-desc">Curiosity hook pulls them past the fold. Proof bar grants permission.</div>
+        <div class="conv-emotion">Feeling: "Others did this"</div>
+      </div>
+      <div class="conv-step">
+        <div class="conv-n">03</div>
+        <div class="conv-name">Trust</div>
+        <div class="conv-desc">Data section lands. Numbers, faces, logos stack the authority.</div>
+        <div class="conv-emotion">Feeling: "This is real"</div>
+      </div>
+      <div class="conv-step">
+        <div class="conv-n">04</div>
+        <div class="conv-name">Micro Yes</div>
+        <div class="conv-desc">Stage 1 form — one field only. Low risk. Easy to say yes.</div>
+        <div class="conv-emotion">Feeling: "This is easy"</div>
+      </div>
+      <div class="conv-step">
+        <div class="conv-n">05</div>
+        <div class="conv-name">Full Yes</div>
+        <div class="conv-desc">Stage 2 form appears. They complete it — committed now.</div>
+        <div class="conv-emotion">Feeling: "I'm in"</div>
+      </div>
+      <div class="conv-step">
+        <div class="conv-n">06</div>
+        <div class="conv-name">Share</div>
+        <div class="conv-desc">Bottom section triggers a share — "Send this to someone who needs it."</div>
+        <div class="conv-emotion">Feeling: "I want others to see this"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 PRE-BUILD CHECKLIST -->
+  <div class="spec-section">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <div class="section-title-wrap">
+        <div class="section-label">Pre-Build Checklist</div>
+        <h2 class="section-title">Every question answered before code opens.</h2>
+      </div>
+    </div>
+
+    <div class="checklist">
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Audience mental state defined</div><div class="check-sub">Warm referred — confirmation mode, not persuasion mode</div></div>
+        <div class="check-cat">Audience</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">3-second hero test written</div><div class="check-sub">Can a stranger know what it is, who it's for, and why it's credible in 3s?</div></div>
+        <div class="check-cat">Hero</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Mobile thumb-zone mapped</div><div class="check-sub">Primary CTA reachable with one thumb, bottom 40% of screen</div></div>
+        <div class="check-cat">Mobile</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Outcome-first headline written</div><div class="check-sub">Leads with transformation, not service name or features</div></div>
+        <div class="check-cat">Copy</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Real client photos sourced</div><div class="check-sub">Authentic faces, not stock — with first name and one-line outcome</div></div>
+        <div class="check-cat">Proof</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Specific numbers confirmed</div><div class="check-sub">"127 projects" not "many" — every stat must be real and exact</div></div>
+        <div class="check-cat">Authority</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Authority woven into every section</div><div class="check-sub">Not one testimonials page — scattered signals throughout the scroll</div></div>
+        <div class="check-cat">Trust</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Two-stage form built</div><div class="check-sub">Stage 1: one field. Stage 2: full form after micro-yes</div></div>
+        <div class="check-cat">Conversion</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Animation budget set</div><div class="check-sub">Max 400ms per animation, purpose-only, no decorative motion</div></div>
+        <div class="check-cat">Motion</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Share trigger designed</div><div class="check-sub">A line so quotable they screenshot it + "send to someone" CTA</div></div>
+        <div class="check-cat">Viral</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Page load under 2 seconds</div><div class="check-sub">Fonts preloaded, images compressed, no render-blocking scripts</div></div>
+        <div class="check-cat">Performance</div>
+      </div>
+      <div class="check-item">
+        <div class="check-box"><div class="check-icon" onclick="toggle(this)">✓</div></div>
+        <div><div class="check-text">Single CTA confirmed</div><div class="check-sub">One action, one colour, one message — repeated identically everywhere</div></div>
+        <div class="check-cat">Focus</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL RULE -->
+  <div class="final-rule">
+    <div class="final-q">The Subconscious Permission Rule</div>
+    <div class="final-text">"The page doesn't convince them. It confirms what they already wanted to believe."</div>
+    <div class="final-sub">Spec complete · Build with intention · Every pixel earns its place</div>
+  </div>
+
+</div>
+
+<script>
+function toggle(el) {
+  el.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '✓' : '✓';
+}
+// Init all as done for demo
+document.querySelectorAll('.check-icon').forEach(el => el.classList.add('done'));
+</script>
+</body>
+</html>
