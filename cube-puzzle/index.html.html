@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crayon Cube — Portfolio Access</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+
+  :root {
+    --bg: #fdf6e8;
+    --paper: #fffcf5;
+    --ink: #5b4636;
+    --ink-light: #8a6d54;
+    --accent: #e8483c;
+    --success: #4caf5e;
+    --border: #e2d8c3;
+    --shadow: rgba(91, 70, 54, 0.12);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { 
+    width:100%; height:100%; overflow:hidden; 
+    background:var(--bg); color:var(--ink); 
+    font-family:'Fredoka', 'Comic Sans MS', sans-serif; 
+    user-select:none;
+  }
+
+  /* ===== HEADER & LOG ===== */
+  #header {
+    position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    text-align:center; z-index:10; width:90%; pointer-events:none;
+  }
+  #title {
+    font-size:1.4rem; font-weight:600; letter-spacing:1px;
+    color:var(--ink); margin-bottom:4px;
+  }
+  #subtitle {
+    font-size:0.9rem; color:var(--ink-light); font-weight:400;
+  }
+  #trail-box {
+    margin-top:8px; display:inline-block; padding:4px 14px;
+    background:var(--paper); border:2px dashed var(--border);
+    border-radius:20px; font-family:'JetBrains Mono', monospace;
+    font-size:0.85rem; color:var(--accent); font-weight:500;
+    box-shadow:0 4px 10px var(--shadow);
+    opacity:0; transition:opacity 0.3s ease;
+  }
+  #trail-box.show { opacity:1; }
+
+  /* ===== CANVAS ===== */
+  #canvas-container {
+    position:fixed; top:0; left:0; right:0; bottom:160px; z-index:1;
+  }
+  canvas { display:block; width:100%; height:100%; }
+
+  /* ===== CONTROL PANEL ===== */
+  #controls {
+    position:fixed; bottom:0; left:0; right:0; z-index:10;
+    height:160px; background:var(--paper);
+    border-top:3px solid var(--border);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:12px; padding:0 16px;
+    box-shadow:0 -10px 25px var(--shadow);
+  }
+
+  /* Action Buttons (The Friendly Controls) */
+  .action-row {
+    display:flex; gap:10px; max-width:640px; width:100%;
+  }
+  .btn-action {
+    flex:1; height:44px; border-radius:12px;
+    border:2px solid var(--ink); background:var(--bg);
+    color:var(--ink); font-family:'Fredoka', sans-serif;
+    font-size:0.9rem; font-weight:600; cursor:pointer;
+    transition:all 0.15s ease;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    box-shadow:0 4px 0 var(--ink);
+  }
+  .btn-action:hover {
+    transform:translateY(-2px); box-shadow:0 6px 0 var(--ink);
+    background:#fff;
+  }
+  .btn-action:active {
+    transform:translateY(2px); box-shadow:0 2px 0 var(--ink);
+  }
+  .btn-action.primary {
+    background:var(--accent); color:#fff; border-color:var(--accent);
+    box-shadow:0 4px 0 #b33225;
+  }
+  .btn-action.primary:hover { background:#f05549; box-shadow:0 6px 0 #b33225; }
+  .btn-action.primary:active { transform:translateY(2px); box-shadow:0 2px 0 #b33225; }
+  
+  .btn-action.success {
+    background:var(--success); color:#fff; border-color:var(--success);
+    box-shadow:0 4px 0 #368543;
+  }
+  .btn-action.success:hover { background:#5bbe6c; box-shadow:0 6px 0 #368543; }
+  .btn-action.success:active { transform:translateY(2px); box-shadow:0 2px 0 #368543; }
+
+  /* Move Grid */
+  .move-grid {
+    display:grid; grid-template-columns:repeat(12, 1fr);
+    gap:6px; max-width:640px; width:100%;
+  }
+  .btn-move {
+    height:38px; border-radius:8px;
+    border:2px solid var(--border); background:var(--bg);
+    color:var(--ink); font-family:'JetBrains Mono', monospace;
+    font-size:0.8rem; font-weight:600; cursor:pointer;
+    transition:all 0.1s ease; display:flex; align-items:center; justify-content:center;
+  }
+  .btn-move:hover {
+    border-color:var(--ink); background:#fff; transform:scale(1.05);
+  }
+  .btn-move:active {
+    background:var(--ink); color:#fff; transform:scale(0.95);
+  }
+  .btn-move:disabled, .btn-action:disabled {
+    opacity:0.4; cursor:not-allowed; pointer-events:none;
+    transform:none !important; box-shadow:none !important;
+  }
+
+  /* ===== WIN OVERLAY ===== */
+  #win-overlay {
+    position:fixed; inset:0; z-index:100;
+    background:rgba(253, 246, 232, 0.94);
+    backdrop-filter:blur(8px);
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    gap:16px; padding:20px;
+  }
+  #win-overlay.active { display:flex; }
+  .win-badge {
+    font-size:3.5rem; animation:bounce 1s infinite alternate;
+  }
+  @keyframes bounce { from { transform:translateY(0); } to { transform:translateY(-10px); } }
+  .win-title {
+    font-size:2.2rem; font-weight:600; color:var(--success);
+  }
+  .win-sub {
+    font-size:1.1rem; color:var(--ink-light); max-width:400px;
+  }
+  .win-timer {
+    font-size:1.8rem; font-weight:600; color:var(--ink);
+    font-family:'JetBrains Mono', monospace;
+    background:var(--paper); padding:8px 24px; border-radius:20px;
+    border:2px solid var(--border); box-shadow:0 4px 12px var(--shadow);
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 600px) {
+    .move-grid { grid-template-columns:repeat(6, 1fr); }
+    #controls { height:200px; }
+    #canvas-container { bottom:200px; }
+    #title { font-size:1.1rem; }
+    .btn-action { font-size:0.75rem; height:40px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="title">🎨 Crayon Puzzle — Unlock Portfolio</div>
+  <div id="subtitle">Scramble to play, or hit Auto-Solve to skip straight to the portfolio!</div>
+  <div id="trail-box">Scramble Trail: <span id="trail-text">None</span></div>
+</div>
+
+<div id="canvas-container"></div>
+
+<div id="win-overlay">
+  <div class="win-badge">🎉</div>
+  <div class="win-title">Cube Solved!</div>
+  <div class="win-sub">Great job! Redirecting you to Harsh's Neural Portfolio...</div>
+  <div class="win-timer" id="timer">3s</div>
+</div>
+
+<div id="controls">
+  <div class="action-row">
+    <button class="btn-action primary" id="scramble-btn" onclick="window.scrambleCube()">🎲 SCRAMBLE (3 MOVES)</button>
+    <button class="btn-action" id="undo-btn" onclick="window.undoMove()" disabled>↩ UNDO</button>
+    <button class="btn-action success" id="solve-btn" onclick="window.autoSolve()">✨ AUTO-SOLVE & UNLOCK</button>
+  </div>
+  <div class="move-grid">
+    <button class="btn-move" onclick="window.doMove('U')">U</button>
+    <button class="btn-move" onclick="window.doMove('U\'')">U'</button>
+    <button class="btn-move" onclick="window.doMove('D')">D</button>
+    <button class="btn-move" onclick="window.doMove('D\'')">D'</button>
+    <button class="btn-move" onclick="window.doMove('L')">L</button>
+    <button class="btn-move" onclick="window.doMove('L\'')">L'</button>
+    <button class="btn-move" onclick="window.doMove('R')">R</button>
+    <button class="btn-move" onclick="window.doMove('R\'')">R'</button>
+    <button class="btn-move" onclick="window.doMove('F')">F</button>
+    <button class="btn-move" onclick="window.doMove('F\'')">F'</button>
+    <button class="btn-move" onclick="window.doMove('B')">B</button>
+    <button class="btn-move" onclick="window.doMove('B\'')">B'</button>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const PORTFOLIO_URL = 'harsh-neural-portfolio.html'; // Set your destination URL here
+
+// ========================
+// THREE.JS SCENE SETUP
+// ========================
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xfdf6e8);
+
+const camera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 100);
+camera.position.set(6.5, 6, 8);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 1.8;
+controls.enablePan = false;
+controls.minDistance = 5.5;
+controls.maxDistance = 13;
+
+scene.add(new THREE.AmbientLight(0xfff2df, 1.0));
+const key = new THREE.DirectionalLight(0xffffff, 1.1);
+key.position.set(8, 10, 6);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0xffe9c7, 0.5);
+fill.position.set(-6, 4, -8);
+scene.add(fill);
+
+// ========================
+// CRAYON TEXTURES & MATERIALS
+// ========================
+const CRAYON = {
+  right: '#e8483c', left: '#f5922e', top: '#fdfaf1',
+  bottom: '#f4d334', front: '#4caf5e', back: '#3d8fd6'
+};
+const PAPER = '#3a3128';
+
+function crayonTexture(hex, dark) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 256;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = hex; ctx.fillRect(0,0,256,256);
+  ctx.strokeStyle = dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.10)';
+  ctx.lineCap = 'round';
+  for (let i=0; i<70; i++) {
+    ctx.lineWidth = 1 + Math.random()*3;
+    ctx.globalAlpha = 0.15 + Math.random()*0.25;
+    const x1 = Math.random()*256, y1 = Math.random()*256;
+    const angle = Math.random()*Math.PI;
+    const len = 20 + Math.random()*60;
+    ctx.beginPath(); ctx.moveTo(x1, y1);
+    ctx.lineTo(x1+Math.cos(angle)*len, y1+Math.sin(angle)*len); ctx.stroke();
+  }
+  ctx.globalAlpha = 0.08;
+  ctx.strokeStyle = dark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.25)';
+  ctx.lineWidth = 6; ctx.strokeRect(4,4,248,248);
+  const tex = new THREE.CanvasTexture(c);
+  tex.needsUpdate = true; return tex;
+}
+
+function stickerMat(hex, glow) {
+  return new THREE.MeshStandardMaterial({
+    map: glow ? crayonTexture(hex, false) : crayonTexture(PAPER, true),
+    roughness: 0.85, metalness: 0.02
+  });
+}
+
+// ========================
+// BUILD CUBE
+// ========================
+const cubeGroup = new THREE.Group();
+scene.add(cubeGroup);
+const SIZE = 0.95, GAP = 1.02, cubies = [];
+
+for (let x=-1; x<=1; x++) {
+for (let y=-1; y<=1; y++) {
+for (let z=-1; z<=1; z++) {
+  const geo = new THREE.BoxGeometry(SIZE, SIZE, SIZE, 2, 2, 2);
+  const mats = [
+    stickerMat(CRAYON.right, x===1), stickerMat(CRAYON.left, x===-1),
+    stickerMat(CRAYON.top, y===1), stickerMat(CRAYON.bottom, y===-1),
+    stickerMat(CRAYON.front, z===1), stickerMat(CRAYON.back, z===-1)
+  ];
+  const mesh = new THREE.Mesh(geo, mats);
+  mesh.position.set(x*GAP, y*GAP, z*GAP);
+  
+  // Track logical position and immutable start coordinates for win checking
+  mesh.userData.logicalPos = new THREE.Vector3(x,y,z);
+  mesh.userData.originalPos = new THREE.Vector3(x*GAP, y*GAP, z*GAP);
+  mesh.userData.originalQuat = new THREE.Quaternion().copy(mesh.quaternion);
+  
+  cubeGroup.add(mesh); cubies.push(mesh);
+}}}
+
+const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(SIZE, SIZE, SIZE));
+cubies.forEach(c => {
+  const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color:0x2a2118, linewidth:1 }));
+  line.position.copy(c.position);
+  cubeGroup.add(line); c.userData.edgeLine = line;
+});
+
+// ========================
+// MOVES & GAME STATE
+// ========================
+const MOVES = {
+  U: { axis:'y', layer:1, dir:1 }, "U'": { axis:'y', layer:1, dir:-1 },
+  D: { axis:'y', layer:-1, dir:-1 }, "D'": { axis:'y', layer:-1, dir:1 },
+  R: { axis:'x', layer:1, dir:1 }, "R'": { axis:'x', layer:1, dir:-1 },
+  L: { axis:'x', layer:-1, dir:-1 }, "L'": { axis:'x', layer:-1, dir:1 },
+  F: { axis:'z', layer:1, dir:1 }, "F'": { axis:'z', layer:1, dir:-1 },
+  B: { axis:'z', layer:-1, dir:-1 }, "B'": { axis:'z', layer:-1, dir:1 }
+};
+
+let isAnimating = false;
+let moveHistory = [];
+let isScrambled = false;
+
+function inverse(move) {
+  return move.endsWith("'") ? move.slice(0,-1) : move + "'";
+}
+
+function updateUI() {
+  const trailBox = document.getElementById('trail-box');
+  const trailText = document.getElementById('trail-text');
+  const undoBtn = document.getElementById('undo-btn');
+  
+  if (moveHistory.length > 0) {
+    trailBox.classList.add('show');
+    trailText.textContent = moveHistory.join(' → ');
+    undoBtn.disabled = isAnimating;
+  } else {
+    trailBox.classList.remove('show');
+    undoBtn.disabled = true;
+  }
+}
+
+function setButtonsDisabled(disabled) {
+  document.querySelectorAll('button').forEach(btn => {
+    if (btn.id !== 'undo-btn' || disabled) btn.disabled = disabled;
+  });
+  if (!disabled) updateUI();
+}
+
+function doMove(moveName, duration=420, recordHistory=true) {
+  return new Promise((resolve) => {
+    if (isAnimating || !MOVES[moveName]) { resolve(); return; }
+    isAnimating = true;
+    setButtonsDisabled(true);
+    controls.autoRotate = false;
+
+    if (recordHistory) {
+      moveHistory.push(moveName);
+      updateUI();
+    }
+
+    const m = MOVES[moveName];
+    const layerCubies = cubies.filter(c => Math.round(c.userData.logicalPos[m.axis]) === m.layer);
+    const pivot = new THREE.Group();
+    scene.add(pivot);
+    layerCubies.forEach(c => {
+      cubeGroup.remove(c); cubeGroup.remove(c.userData.edgeLine);
+      pivot.add(c); pivot.add(c.userData.edgeLine);
+    });
+
+    const targetAngle = m.dir * Math.PI/2;
+    const startTime = performance.now();
+
+    function animate(now) {
+      const t = Math.min((now - startTime)/duration, 1);
+      const eased = t<0.5 ? 2*t*t : -1+(4-2*t)*t;
+      pivot.rotation[m.axis] = eased * targetAngle;
+      
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        pivot.rotation[m.axis] = targetAngle;
+        pivot.updateMatrixWorld(true);
+        layerCubies.forEach(c => {
+          c.updateMatrixWorld(true);
+          const worldPos = new THREE.Vector3(); c.getWorldPosition(worldPos);
+          const worldQuat = new THREE.Quaternion(); c.getWorldQuaternion(worldQuat);
+          pivot.remove(c); pivot.remove(c.userData.edgeLine);
+          cubeGroup.add(c); cubeGroup.add(c.userData.edgeLine);
+          c.position.copy(worldPos); c.quaternion.copy(worldQuat);
+          c.position.x = Math.round(c.position.x/GAP)*GAP;
+          c.position.y = Math.round(c.position.y/GAP)*GAP;
+          c.position.z = Math.round(c.position.z/GAP)*GAP;
+          c.userData.logicalPos.set(
+            Math.round(c.position.x/GAP),
+            Math.round(c.position.y/GAP),
+            Math.round(c.position.z/GAP)
+          );
+          c.userData.edgeLine.position.copy(c.position);
+          c.userData.edgeLine.quaternion.copy(c.quaternion);
+        });
+        scene.remove(pivot);
+        isAnimating = false;
+        setButtonsDisabled(false);
+        controls.autoRotate = true;
+        resolve();
+        
+        // Auto-check victory after manual moves
+        if (isScrambled && recordHistory) checkSolved();
+      }
+    }
+    requestAnimationFrame(animate);
+  });
+}
+
+async function scrambleCube() {
+  if (isAnimating) return;
+  moveHistory = [];
+  isScrambled = true;
+  updateUI();
+
+  const pool = Object.keys(MOVES);
+  for (let i = 0; i < 3; i++) {
+    const move = pool[Math.floor(Math.random() * pool.length)];
+    await doMove(move, 380, true);
+  }
+}
+
+async function undoMove() {
+  if (isAnimating || moveHistory.length === 0) return;
+  const lastMove = moveHistory.pop();
+  updateUI();
+  await doMove(inverse(lastMove), 350, false);
+  if (isScrambled) checkSolved();
+}
+
+async function autoSolve() {
+  if (isAnimating) return;
+  if (!isScrambled || moveHistory.length === 0) {
+    // If not scrambled yet, just grant immediate access!
+    triggerWin();
+    return;
+  }
+  
+  while (moveHistory.length > 0) {
+    const lastMove = moveHistory.pop();
+    updateUI();
+    await doMove(inverse(lastMove), 300, false);
+  }
+  triggerWin();
+}
+
+function checkSolved() {
+  let solved = true;
+  for (const c of cubies) {
+    if (c.position.distanceTo(c.userData.originalPos) > 0.05 || 
+        Math.abs(1 - Math.abs(c.quaternion.dot(c.userData.originalQuat))) > 0.05) {
+      solved = false; break;
+    }
+  }
+  if (solved && isScrambled) {
+    isScrambled = false;
+    triggerWin();
+  }
+}
+
+function triggerWin() {
+  document.getElementById('win-overlay').classList.add('active');
+  let sec = 3;
+  const timerEl = document.getElementById('timer');
+  timerEl.textContent = sec + 's';
+  const interval = setInterval(() => {
+    sec--;
+    timerEl.textContent = sec + 's';
+    if (sec <= 0) {
+      clearInterval(interval);
+      window.location.href = PORTFOLIO_URL;
+    }
+  }, 1000);
+}
+
+// ========================
+// RESIZE & RENDER LOOP
+// ========================
+window.addEventListener('resize', () => {
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+});
+
+function animateLoop() {
+  requestAnimationFrame(animateLoop);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animateLoop();
+
+// Expose to window for inline HTML clicks
+window.doMove = (m) => doMove(m, 420, true);
+window.scrambleCube = scrambleCube;
+window.undoMove = undoMove;
+window.autoSolve = autoSolve;
+</script>
+</body>
+</html>
