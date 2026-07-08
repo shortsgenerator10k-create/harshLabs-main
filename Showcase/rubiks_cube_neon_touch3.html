@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neon Rubik's Cube — Tap the 3 Blocks</title>
+<style>
+  html, body { margin:0; padding:0; overflow:hidden; background:#05050a; font-family: 'Segoe UI', sans-serif; }
+  #tutorial {
+    position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    color:#e6f9ff; font-size:13px; letter-spacing:1px; text-align:center;
+    z-index:10; background:rgba(10,10,20,0.55); border:1px solid #00fff255;
+    padding:12px 22px; border-radius:8px; max-width:520px; line-height:1.6;
+    box-shadow:0 0 14px #00fff233;
+  }
+  #tutorial b { color:#00fff2; }
+  #ui { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); display:flex; gap:14px; z-index:10; align-items:center; }
+  button {
+    background: linear-gradient(180deg,#1a1a2e,#0d0d18);
+    border:1px solid #00fff2;
+    color:#00fff2;
+    padding:12px 26px;
+    font-size:14px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    cursor:pointer;
+    border-radius:6px;
+    box-shadow:0 0 10px #00fff2aa, inset 0 0 8px #00fff255;
+    transition:all .2s;
+  }
+  button:hover:not(:disabled) { box-shadow:0 0 20px #00fff2, inset 0 0 12px #00fff2aa; transform:translateY(-2px); }
+  button:disabled { opacity:.3; cursor:not-allowed; box-shadow:none; }
+  #status { color:#ffcf5c; font-size:13px; letter-spacing:1px; text-shadow:0 0 8px #ffcf5c88; min-width:220px; text-align:center; }
+  canvas { display:block; touch-action:none; }
+</style>
+</head>
+<body>
+<div id="tutorial">
+  <b>Drag anywhere</b> to orbit the cube a full 360&deg;, any direction.<br>
+  <b>Tap the 3 glowing gold blocks</b> to scramble the cube, one tap each.<br>
+  Once all 3 are tapped, hit <b>Solve</b> to reverse those exact 3 moves.
+</div>
+<div id="ui">
+  <span id="status">0 / 3 blocks tapped</span>
+  <button id="solveBtn" disabled>Solve</button>
+  <button id="resetBtn">Reset</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+const statusEl = document.getElementById('status');
+const solveBtn = document.getElementById('solveBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05050a);
+scene.fog = new THREE.FogExp2(0x05050a, 0.03);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(6.5, 6, 8);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 5;
+controls.maxDistance = 20;
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.15, 0.6, 0.12);
+composer.addPass(bloomPass);
+
+scene.add(new THREE.AmbientLight(0x404060, 1.1));
+const key = new THREE.PointLight(0x00fff2, 2.2, 30);
+key.position.set(8,10,8);
+scene.add(key);
+const rim = new THREE.PointLight(0xff00d4, 1.5, 30);
+rim.position.set(-8,-6,-8);
+scene.add(rim);
+
+const NEON = {
+  right: 0xff2d55,
+  left: 0xff9d00,
+  top: 0xffffff,
+  bottom: 0xf5ff00,
+  front: 0x00ff85,
+  back: 0x00c3ff
+};
+const DARK = 0x0a0a12;
+const GOLD = 0xffd23f;
+
+function stickerMat(color, glow) {
+  return new THREE.MeshStandardMaterial({
+    color: glow ? color : DARK,
+    emissive: glow ? color : 0x000000,
+    emissiveIntensity: glow ? 1.1 : 0,
+    metalness: 0.35,
+    roughness: 0.3
+  });
+}
+
+const cubeGroup = new THREE.Group();
+scene.add(cubeGroup);
+
+const SIZE = 0.95;
+const GAP = 1.02;
+const cubies = [];
+
+for (let x=-1; x<=1; x++) {
+for (let y=-1; y<=1; y++) {
+for (let z=-1; z<=1; z++) {
+  const geo = new THREE.BoxGeometry(SIZE, SIZE, SIZE);
+  const mats = [
+    stickerMat(NEON.right, x===1),
+    stickerMat(NEON.left, x===-1),
+    stickerMat(NEON.top, y===1),
+    stickerMat(NEON.bottom, y===-1),
+    stickerMat(NEON.front, z===1),
+    stickerMat(NEON.back, z===-1)
+  ];
+  const mesh = new THREE.Mesh(geo, mats);
+  mesh.position.set(x*GAP, y*GAP, z*GAP);
+  mesh.userData.logicalPos = new THREE.Vector3(x,y,z);
+  cubeGroup.add(mesh);
+  cubies.push(mesh);
+}}}
+
+const MOVES = {
+  U: { axis:'y', layer:1, dir:1 },
+  "U'": { axis:'y', layer:1, dir:-1 },
+  D: { axis:'y', layer:-1, dir:-1 },
+  "D'": { axis:'y', layer:-1, dir:1 },
+  R: { axis:'x', layer:1, dir:1 },
+  "R'": { axis:'x', layer:1, dir:-1 },
+  L: { axis:'x', layer:-1, dir:-1 },
+  "L'": { axis:'x', layer:-1, dir:1 },
+  F: { axis:'z', layer:1, dir:1 },
+  "F'": { axis:'z', layer:1, dir:-1 },
+  B: { axis:'z', layer:-1, dir:-1 },
+  "B'": { axis:'z', layer:-1, dir:1 }
+};
+function inverse(move) {
+  return move.endsWith("'") ? move.slice(0,-1) : move + "'";
+}
+
+let animating = false;
+
+function doMove(moveName, duration=420) {
+  return new Promise((resolve) => {
+    const m = MOVES[moveName];
+    const layerCubies = cubies.filter(c => Math.round(c.userData.logicalPos[m.axis]) === m.layer);
+    const pivot = new THREE.Group();
+    scene.add(pivot);
+    layerCubies.forEach(c => {
+      cubeGroup.remove(c);
+      pivot.add(c);
+    });
+    const targetAngle = m.dir * Math.PI/2;
+    const startTime = performance.now();
+    function animate(now) {
+      const t = Math.min((now - startTime)/duration, 1);
+      const eased = t<0.5 ? 2*t*t : -1+(4-2*t)*t;
+      pivot.rotation[m.axis] = eased * targetAngle;
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        pivot.rotation[m.axis] = targetAngle;
+        pivot.updateMatrixWorld(true);
+        layerCubies.forEach(c => {
+          c.updateMatrixWorld(true);
+          const worldPos = new THREE.Vector3();
+          c.getWorldPosition(worldPos);
+          const worldQuat = new THREE.Quaternion();
+          c.getWorldQuaternion(worldQuat);
+          pivot.remove(c);
+          cubeGroup.add(c);
+          c.position.copy(worldPos);
+          c.quaternion.copy(worldQuat);
+          c.position.x = Math.round(c.position.x/GAP)*GAP;
+          c.position.y = Math.round(c.position.y/GAP)*GAP;
+          c.position.z = Math.round(c.position.z/GAP)*GAP;
+          c.userData.logicalPos.set(
+            Math.round(c.position.x/GAP),
+            Math.round(c.position.y/GAP),
+            Math.round(c.position.z/GAP)
+          );
+        });
+        scene.remove(pivot);
+        resolve();
+      }
+    }
+    requestAnimationFrame(animate);
+  });
+}
+
+const MOVE_POOL = Object.keys(MOVES);
+const TARGET_LOGICAL = [
+  new THREE.Vector3(1,1,1),
+  new THREE.Vector3(-1,1,-1),
+  new THREE.Vector3(1,-1,-1)
+];
+let touchTargets = [];
+let tappedCount = 0;
+let scrambleLog = [];
+
+function findCubieAt(vec) {
+  return cubies.find(c =>
+    Math.round(c.userData.logicalPos.x) === vec.x &&
+    Math.round(c.userData.logicalPos.y) === vec.y &&
+    Math.round(c.userData.logicalPos.z) === vec.z
+  );
+}
+
+function setupTouchTargets() {
+  touchTargets.forEach(t => {
+    if (t.ring) scene.remove(t.ring);
+  });
+  touchTargets = [];
+  tappedCount = 0;
+  scrambleLog = [];
+  solveBtn.disabled = true;
+  statusEl.textContent = '0 / 3 blocks tapped';
+
+  TARGET_LOGICAL.forEach((vec, i) => {
+    const cubie = findCubieAt(vec);
+    if (!cubie) return;
+    cubie.material.forEach(mat => {
+      if (mat.emissiveIntensity > 0) {
+        mat.userData = mat.userData || {};
+        mat.userData.baseEmissive = mat.emissiveIntensity;
+      }
+    });
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.75, 0.9, 32),
+      new THREE.MeshBasicMaterial({ color: GOLD, side: THREE.DoubleSide, transparent:true, opacity:0.85 })
+    );
+    ring.position.copy(cubie.position);
+    ring.lookAt(camera.position);
+    scene.add(ring);
+    const assignedMove = MOVE_POOL[Math.floor(Math.random()*MOVE_POOL.length)];
+    touchTargets.push({ cubie, ring, used:false, move: assignedMove });
+  });
+}
+setupTouchTargets();
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+renderer.domElement.addEventListener('click', async (event) => {
+  if (animating) return;
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hitCubies = touchTargets.filter(t => !t.used).map(t => t.cubie);
+  const intersects = raycaster.intersectObjects(hitCubies, false);
+  if (intersects.length === 0) return;
+  const hitMesh = intersects[0].object;
+  const target = touchTargets.find(t => t.cubie === hitMesh && !t.used);
+  if (!target) return;
+
+  animating = true;
+  target.used = true;
+  scene.remove(target.ring);
+  scrambleLog.push(target.move);
+  tappedCount++;
+  statusEl.textContent = `${tappedCount} / 3 blocks tapped`;
+  await doMove(target.move);
+  animating = false;
+  if (tappedCount === 3) {
+    solveBtn.disabled = false;
+    statusEl.textContent = 'Cube unsolved — ready to solve';
+  }
+});
+
+solveBtn.addEventListener('click', async () => {
+  if (animating || scrambleLog.length === 0) return;
+  animating = true;
+  solveBtn.disabled = true;
+  const solveMoves = scrambleLog.slice().reverse().map(inverse);
+  for (const mv of solveMoves) {
+    statusEl.textContent = 'Solving: ' + mv;
+    await doMove(mv);
+  }
+  statusEl.textContent = 'Solved';
+  animating = false;
+  setTimeout(setupTouchTargets, 900);
+});
+
+resetBtn.addEventListener('click', () => {
+  if (animating) return;
+  setupTouchTargets();
+  statusEl.textContent = '0 / 3 blocks tapped';
+});
+
+function animateLoop() {
+  requestAnimationFrame(animateLoop);
+  controls.update();
+  touchTargets.forEach(t => {
+    if (!t.used) {
+      t.ring.lookAt(camera.position);
+      t.ring.material.opacity = 0.6 + Math.sin(performance.now()/280)*0.25;
+    }
+  });
+  composer.render();
+}
+animateLoop();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

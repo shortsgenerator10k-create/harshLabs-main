@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HARSHLABS.AI // OBSIDIAN LAB</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#08090a',
+                        cyber: '#00f0ff',
+                        violet: '#8a2be2',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #08090a; color: #ffffff; overflow-x: hidden; }
+        
+        /* 1. ROTATING PLASMA AMBIENT MESH */
+        @keyframes floatMesh {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(30px, -50px) scale(1.1) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) scale(0.9) rotate(240deg); }
+        }
+        .plasma-mesh {
+            position: fixed;
+            width: 60vw;
+            height: 60vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(138,43,226,0.15) 0%, rgba(0,240,255,0.08) 50%, transparent 70%);
+            filter: blur(80px);
+            animation: floatMesh 20s infinite ease-in-out;
+            z-index: -1;
+            top: 10%;
+            left: 20%;
+        }
+
+        /* 2. GLASSMORPHISM CARDS WITH GLOW BORDER */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.4);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -15px rgba(0, 240, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        /* 3. TYPEWRITER CURSOR */
+        .type-cursor::after {
+            content: '|';
+            color: #00f0ff;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    </style>
+</head>
+<body class="min-h-screen p-6 md:p-12 flex flex-col justify-between selection:bg-cyber selection:text-obsidian">
+
+    <!-- AMBIENT GLOW MESH -->
+    <div class="plasma-mesh"></div>
+
+    <!-- NAV -->
+    <nav class="flex justify-between items-center border-b border-white/10 pb-6 text-xs font-mono tracking-widest text-neutral-400">
+        <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-cyber animate-ping"></span>
+            <span class="font-display font-bold text-white tracking-normal text-sm">HARSHLABS.AI</span>
+        </div>
+        <div class="hidden sm:block">
+            <span>SYSTEM: AUTONOMOUS INTELLIGENCE LAB</span>
+        </div>
+        <div class="text-cyber border border-cyber/30 px-3 py-1 rounded-full bg-cyber/5">
+            [ STATUS: DEPLOYED ]
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <main class="my-16 max-w-5xl">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 font-mono text-xs text-neutral-300 mb-6">
+            <span class="text-cyber">⚡</span>
+            <span>NEXT-GEN ARCHITECTURE // 2026 SPECS</span>
+        </div>
+
+        <h1 class="font-display text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-white leading-none mb-6">
+            AUTONOMOUS <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-400 to-neutral-700">WORKFORCES.</span>
+        </h1>
+
+        <p class="font-sans text-lg md:text-xl text-neutral-400 max-w-2xl leading-relaxed font-light mb-8">
+            We replace manual enterprise bottlenecks with self-correcting LLM pipelines and zero-latency extraction engines.
+        </p>
+
+        <!-- LIVE TYPEWRITER COMMAND BOX -->
+        <div class="bg-black/80 border border-white/10 rounded-lg p-4 font-mono text-xs md:text-sm text-neutral-300 max-w-xl shadow-inner flex items-center space-x-3">
+            <span class="text-cyber font-bold">&gt;</span>
+            <span id="typewriter" class="type-cursor text-white"></span>
+        </div>
+
+        <!-- 3-PILLAR GLASS GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="text-cyber font-mono text-xs mb-4 uppercase tracking-widest">// 01. SCRAPE</div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Extraction Grid</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">Multi-threaded scraping architectures harvesting proprietary market intelligence without rate-limit friction.</p>
+                </div>
+                <div class="mt-8 font-mono text-[11px] text-neutral-500 border-t border-white/10 pt-4 flex justify-between">
+                    <span>CAPACITY</span>
+                    <span class="text-white font-bold">10K+ NODES/DAY</span>
+                </div>
+            </div>
+
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="text-cyber font-mono text-xs mb-4 uppercase tracking-widest">// 02. COGNITION</div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">LLM Core Engine</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">Deterministic AI agents bound directly to custom JSON business logic. Zero hallucinations. Pure execution.</p>
+                </div>
+                <div class="mt-8 font-mono text-[11px] text-neutral-500 border-t border-white/10 pt-4 flex justify-between">
+                    <span>PRECISION</span>
+                    <span class="text-white font-bold">99.9% ACCURACY</span>
+                </div>
+            </div>
+
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="text-cyber font-mono text-xs mb-4 uppercase tracking-widest">// 03. VELOCITY</div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Zero Latency</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">Complete eradication of manual administrative drag. Your operational pipeline running 24/7/365 on autopilot.</p>
+                </div>
+                <div class="mt-8 font-mono text-[11px] text-neutral-500 border-t border-white/10 pt-4 flex justify-between">
+                    <span>SPEED</span>
+                    <span class="text-white font-bold">&lt; 200MS RESPONSE</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center text-xs font-mono text-neutral-500 gap-4">
+        <div>&copy; 2026 HARSHLABS.AI &mdash; ALL RIGHTS RESERVED.</div>
+        <a href="https://harshlabs.ai" class="group flex items-center space-x-2 text-white bg-white/10 hover:bg-cyber hover:text-black px-6 py-3 rounded-full font-bold transition-all duration-300">
+            <span>INITIATE ARCHITECTURAL AUDIT</span>
+            <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
+        </a>
+    </footer>
+
+    <!-- TYPEWRITER JS -->
+    <script>
+        const words = [
+            "harshlabs.ai --deploy-agents --target=enterprise",
+            "connecting to autonomous extraction grid...",
+            "optimizing LLM structured JSON output pipelines...",
+            "system status: 100% operational velocity achieved."
+        ];
+        let i = 0; let j = 0; let currentWord = ""; let isDeleting = false;
+        
+        function type() {
+            currentWord = words[i];
+            if (isDeleting) {
+                document.getElementById("typewriter").textContent = currentWord.substring(0, j-1);
+                j--;
+                if (j == 0) { isDeleting = false; i = (i + 1) % words.length; }
+            } else {
+                document.getElementById("typewriter").textContent = currentWord.substring(0, j+1);
+                j++;
+                if (j == currentWord.length) { isDeleting = true; setTimeout(type, 2000); return; }
+            }
+            setTimeout(type, isDeleting ? 30 : 60);
+        }
+        type();
+    </script>
+</body>
+</html>

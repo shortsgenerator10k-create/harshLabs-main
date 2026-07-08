@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Crayon Rubik's Cube — Auto Solve</title>
+<style>
+  html, body { margin:0; padding:0; overflow:hidden; background:#fdf6e8; font-family: 'Comic Sans MS', 'Segoe UI', sans-serif; }
+  #title {
+    position:fixed; top:26px; left:50%; transform:translateX(-50%);
+    color:#5b4636; font-size:13px; letter-spacing:2px; opacity:.7; z-index:10;
+    text-align:center; width:90%;
+  }
+  #log {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+    color:#8a5a2b; font-size:14px; letter-spacing:1px; text-align:center;
+    z-index:10;
+  }
+  canvas { display:block; }
+</style>
+</head>
+<body>
+<div id="title">NO TOUCH NEEDED &middot; WATCHES ITSELF SCRAMBLE &amp; SOLVE ON LOOP</div>
+<div id="log">Solved</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const logEl = document.getElementById('log');
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xfdf6e8);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(6.5, 6, 8);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 2.4;
+controls.enablePan = false;
+controls.minDistance = 6;
+controls.maxDistance = 14;
+
+scene.add(new THREE.AmbientLight(0xfff2df, 1.0));
+const key = new THREE.DirectionalLight(0xffffff, 1.1);
+key.position.set(8,10,6);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0xffe9c7, 0.5);
+fill.position.set(-6,4,-8);
+scene.add(fill);
+
+const CRAYON = {
+  right: '#e8483c',
+  left: '#f5922e',
+  top: '#fdfaf1',
+  bottom: '#f4d334',
+  front: '#4caf5e',
+  back: '#3d8fd6'
+};
+const PAPER = '#3a3128';
+
+function crayonTexture(hex, dark) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 256;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = hex;
+  ctx.fillRect(0,0,256,256);
+  if (dark) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  } else {
+    ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+  }
+  ctx.lineCap = 'round';
+  for (let i=0;i<70;i++) {
+    ctx.lineWidth = 1 + Math.random()*3;
+    ctx.globalAlpha = 0.15 + Math.random()*0.25;
+    const x1 = Math.random()*256, y1 = Math.random()*256;
+    const angle = Math.random()*Math.PI;
+    const len = 20 + Math.random()*60;
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x1+Math.cos(angle)*len, y1+Math.sin(angle)*len);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 0.08;
+  ctx.strokeStyle = dark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.25)';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(4,4,248,248);
+  const tex = new THREE.CanvasTexture(c);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function stickerMat(hex, glow) {
+  return new THREE.MeshStandardMaterial({
+    map: glow ? crayonTexture(hex, false) : crayonTexture(PAPER, true),
+    roughness: 0.85,
+    metalness: 0.02
+  });
+}
+
+const cubeGroup = new THREE.Group();
+scene.add(cubeGroup);
+
+const SIZE = 0.95;
+const GAP = 1.02;
+const cubies = [];
+
+for (let x=-1; x<=1; x++) {
+for (let y=-1; y<=1; y++) {
+for (let z=-1; z<=1; z++) {
+  const geo = new THREE.BoxGeometry(SIZE, SIZE, SIZE, 2, 2, 2);
+  const mats = [
+    stickerMat(CRAYON.right, x===1),
+    stickerMat(CRAYON.left, x===-1),
+    stickerMat(CRAYON.top, y===1),
+    stickerMat(CRAYON.bottom, y===-1),
+    stickerMat(CRAYON.front, z===1),
+    stickerMat(CRAYON.back, z===-1)
+  ];
+  const mesh = new THREE.Mesh(geo, mats);
+  mesh.position.set(x*GAP, y*GAP, z*GAP);
+  mesh.userData.logicalPos = new THREE.Vector3(x,y,z);
+  cubeGroup.add(mesh);
+  cubies.push(mesh);
+}}}
+
+const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(SIZE, SIZE, SIZE));
+cubies.forEach(c => {
+  const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color:0x2a2118, linewidth:1 }));
+  line.position.copy(c.position);
+  cubeGroup.add(line);
+  c.userData.edgeLine = line;
+});
+
+const MOVES = {
+  U: { axis:'y', layer:1, dir:1 },
+  "U'": { axis:'y', layer:1, dir:-1 },
+  D: { axis:'y', layer:-1, dir:-1 },
+  "D'": { axis:'y', layer:-1, dir:1 },
+  R: { axis:'x', layer:1, dir:1 },
+  "R'": { axis:'x', layer:1, dir:-1 },
+  L: { axis:'x', layer:-1, dir:-1 },
+  "L'": { axis:'x', layer:-1, dir:1 },
+  F: { axis:'z', layer:1, dir:1 },
+  "F'": { axis:'z', layer:1, dir:-1 },
+  B: { axis:'z', layer:-1, dir:-1 },
+  "B'": { axis:'z', layer:-1, dir:1 }
+};
+
+function inverse(move) {
+  return move.endsWith("'") ? move.slice(0,-1) : move + "'";
+}
+
+function doMove(moveName, duration=520) {
+  return new Promise((resolve) => {
+    const m = MOVES[moveName];
+    const layerCubies = cubies.filter(c => Math.round(c.userData.logicalPos[m.axis]) === m.layer);
+    const pivot = new THREE.Group();
+    scene.add(pivot);
+    layerCubies.forEach(c => {
+      cubeGroup.remove(c);
+      cubeGroup.remove(c.userData.edgeLine);
+      pivot.add(c);
+      pivot.add(c.userData.edgeLine);
+    });
+
+    const targetAngle = m.dir * Math.PI/2;
+    const startTime = performance.now();
+
+    function animate(now) {
+      const t = Math.min((now - startTime)/duration, 1);
+      const eased = t<0.5 ? 2*t*t : -1+(4-2*t)*t;
+      pivot.rotation[m.axis] = eased * targetAngle;
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        pivot.rotation[m.axis] = targetAngle;
+        pivot.updateMatrixWorld(true);
+        layerCubies.forEach(c => {
+          c.updateMatrixWorld(true);
+          const worldPos = new THREE.Vector3();
+          c.getWorldPosition(worldPos);
+          const worldQuat = new THREE.Quaternion();
+          c.getWorldQuaternion(worldQuat);
+          pivot.remove(c);
+          pivot.remove(c.userData.edgeLine);
+          cubeGroup.add(c);
+          cubeGroup.add(c.userData.edgeLine);
+          c.position.copy(worldPos);
+          c.quaternion.copy(worldQuat);
+          c.position.x = Math.round(c.position.x/GAP)*GAP;
+          c.position.y = Math.round(c.position.y/GAP)*GAP;
+          c.position.z = Math.round(c.position.z/GAP)*GAP;
+          c.userData.logicalPos.set(
+            Math.round(c.position.x/GAP),
+            Math.round(c.position.y/GAP),
+            Math.round(c.position.z/GAP)
+          );
+          c.userData.edgeLine.position.copy(c.position);
+          c.userData.edgeLine.quaternion.copy(c.quaternion);
+        });
+        scene.remove(pivot);
+        resolve();
+      }
+    }
+    requestAnimationFrame(animate);
+  });
+}
+
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function loop() {
+  while (true) {
+    await wait(2200);
+    const pool = Object.keys(MOVES);
+    const scramble = [pool[Math.floor(Math.random()*pool.length)],
+                       pool[Math.floor(Math.random()*pool.length)],
+                       pool[Math.floor(Math.random()*pool.length)]];
+    logEl.textContent = 'Scrambling itself\u2026';
+    for (const mv of scramble) { await doMove(mv); }
+    await wait(1400);
+    logEl.textContent = 'Solving itself\u2026';
+    const solve = scramble.slice().reverse().map(inverse);
+    for (const mv of solve) { await doMove(mv); }
+    logEl.textContent = 'Solved';
+  }
+}
+loop();
+
+function animateLoop() {
+  requestAnimationFrame(animateLoop);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animateLoop();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

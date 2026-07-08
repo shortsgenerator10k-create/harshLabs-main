@@ -1,0 +1,103 @@
+<h2 class="sr-only">Interactive diagram: bees converge into a honeycomb shield around a small factory, illustrating collateral-free MSME loan guarantees — click any hexagon for scheme details</h2>
+<style>
+@keyframes pulse { 0%,100%{opacity:.55} 50%{opacity:.85} }
+@keyframes wobble { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+.bee { transition: transform 1.1s cubic-bezier(.2,.7,.3,1), opacity .6s ease; }
+.hex { opacity:0; transition:opacity .5s ease; cursor:pointer; }
+.hex.show { opacity:1; }
+.hex:hover polygon { stroke-width:1.5; }
+.shield-on .hexfill { animation: pulse 2.4s ease-in-out infinite; }
+#factory { animation: wobble 3s ease-in-out infinite; }
+.btn { border:0.5px solid var(--border-strong); border-radius:var(--radius); background:transparent; padding:8px 14px; font-size:13px; cursor:pointer; color:var(--text-primary); }
+.btn:hover { background:var(--surface-1); }
+.panel { font-size:13px; color:var(--text-secondary); min-height:40px; padding:10px 12px; border:0.5px solid var(--border); border-radius:var(--radius); margin-top:12px; }
+</style>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+<p style="font-size:13px; color:var(--text-secondary); margin:0;">CGTMSE collateral-free guarantee coverage</p>
+<button class="btn" id="activate">Activate the swarm</button>
+</div>
+<svg id="scene" width="100%" viewBox="0 0 680 380" role="img" aria-label="Bees converging into a honeycomb shield around a small factory">
+<g id="factory">
+<rect x="300" y="240" width="80" height="60" fill="var(--surface-1)" stroke="var(--border-strong)" stroke-width="0.5" rx="2"/>
+<polygon points="300,240 340,215 380,240" fill="var(--surface-1)" stroke="var(--border-strong)" stroke-width="0.5"/>
+<rect x="310" y="205" width="10" height="24" fill="var(--surface-1)" stroke="var(--border-strong)" stroke-width="0.5"/>
+<rect x="316" y="265" width="16" height="35" fill="var(--surface-0)" stroke="var(--border-strong)" stroke-width="0.5"/>
+<rect x="345" y="255" width="14" height="14" fill="var(--surface-0)" stroke="var(--border-strong)" stroke-width="0.5"/>
+</g>
+<g id="bees"></g>
+<g id="hive" class="shield-on"></g>
+</svg>
+<div class="panel" id="detail">Click a hexagon once the shield has formed to see coverage details.</div>
+<script>
+const scene = document.getElementById('scene');
+const beesG = document.getElementById('bees');
+const hiveG = document.getElementById('hive');
+const cx = 340, cy = 260;
+const hexData = [
+{ label:'General MSME', angle:0, r:105, pct:'75% guarantee cover', detail:'CGTMSE covers 75% of the loan amount for general category MSME borrowers — no collateral or third-party guarantee needed.' },
+{ label:'SC/ST & Women', angle:60, r:105, pct:'85% guarantee cover', detail:'Special category borrowers (SC/ST, women-owned units) get elevated cover up to 85% of the loan amount.' },
+{ label:'MUDRA Shishu', angle:120, r:105, pct:'Up to \u20b950,000', detail:'Shishu loans under MUDRA are fully collateral-free with no processing fee, aimed at very small first-time borrowers.' },
+{ label:'Stand-Up India', angle:180, r:105, pct:'\u20b910L\u2013\u20b91Cr', detail:'Composite term loan plus working capital for SC/ST and women entrepreneurs, guaranteed via CGTMSE or NCGTC.' },
+{ label:'PMEGP subsidy', angle:240, r:105, pct:'15\u201335% margin money', detail:'New units get 15\u201325% subsidy (general) or 25\u201335% (special category) on the project cost, on top of the bank loan.' },
+{ label:'SIDBI lending', angle:300, r:105, pct:'8.5\u201313% p.a.', detail:'Concessional interest rates for women-led, green, or North-East region MSMEs, up to \u20b925 crore under SIDBI SMILE.' }
+];
+function hexPoints(x,y,size){
+  let pts = [];
+  for (let i=0;i<6;i++){
+    const a = Math.PI/180 * (60*i - 30);
+    pts.push([x+size*Math.cos(a), y+size*Math.sin(a)].join(','));
+  }
+  return pts.join(' ');
+}
+hexData.forEach((h,i) => {
+  const rad = Math.PI/180 * h.angle;
+  const x = cx + h.r * Math.cos(rad);
+  const y = cy + h.r * Math.sin(rad) * 0.7 - 20;
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('class','hex');
+  g.setAttribute('data-i', i);
+  g.innerHTML = `<polygon class="hexfill" points="${hexPoints(x,y,34)}" fill="#FAC775" fill-opacity="0.5" stroke="#854F0B" stroke-width="1"/><text class="ts" x="${x}" y="${y-2}" text-anchor="middle" fill="#633806">${h.label}</text><text class="ts" x="${x}" y="${y+14}" text-anchor="middle" fill="#854F0B">${h.pct}</text>`;
+  g.addEventListener('click', () => { document.getElementById('detail').textContent = h.detail; });
+  hiveG.appendChild(g);
+});
+const beePositions = [];
+for (let i=0;i<14;i++){
+  const startAngle = i * 137.5 * Math.PI/180;
+  const startR = 260 + (i%4)*40;
+  const sx = 340 + startR*Math.cos(startAngle);
+  const sy = 190 + startR*Math.sin(startAngle)*0.5;
+  const bee = document.createElementNS('http://www.w3.org/2000/svg','g');
+  bee.setAttribute('class','bee');
+  bee.style.opacity = 0;
+  bee.setAttribute('transform', `translate(${sx},${sy})`);
+  bee.innerHTML = `<ellipse rx="4" ry="2.5" fill="#412402"/><ellipse cx="-3" cy="-3" rx="3" ry="1.5" fill="#F2A623" fill-opacity="0.6" transform="rotate(-20 -3 -3)"/><ellipse cx="3" cy="-3" rx="3" ry="1.5" fill="#F2A623" fill-opacity="0.6" transform="rotate(20 3 -3)"/>`;
+  beesG.appendChild(bee);
+  const targetHex = hexData[i % hexData.length];
+  const trad = Math.PI/180 * targetHex.angle;
+  const tx = cx + targetHex.r*0.8*Math.cos(trad);
+  const ty = cy + targetHex.r*0.8*Math.sin(trad)*0.7 - 20;
+  beePositions.push({ el: bee, sx, sy, tx, ty });
+}
+let activated = false;
+document.getElementById('activate').addEventListener('click', () => {
+  if (activated) return;
+  activated = true;
+  document.getElementById('activate').textContent = 'Shield forming';
+  beePositions.forEach((b,i) => {
+    setTimeout(() => {
+      b.el.style.opacity = 1;
+    }, i*60);
+    setTimeout(() => {
+      b.el.setAttribute('transform', `translate(${b.tx},${b.ty})`);
+    }, 300 + i*70);
+    setTimeout(() => {
+      b.el.style.opacity = 0;
+    }, 1500 + i*40);
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.hex').forEach((h,i) => setTimeout(() => h.classList.add('show'), i*90));
+    document.getElementById('activate').textContent = 'Shield active';
+    document.getElementById('detail').textContent = 'Click any hexagon to see its guarantee coverage.';
+  }, 1900);
+});
+</script>

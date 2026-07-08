@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Ocean Racer — Shark Bay Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean-deep: #0a1628;
+    --ocean-mid: #0d1f3a;
+    --ocean-surface: #143d6b;
+    --foam: #4a9fd4;
+    --gold: #f5c518;
+    --danger: #e8483c;
+    --success: #22c55e;
+    --text: #e8f4fc;
+    --text-dim: #6a8aaa;
+    --panel: rgba(10,22,40,0.92);
+    --font-display: 'Black Ops One', cursive;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--ocean-deep);
+    color: var(--text);
+    font-family: var(--font-mono);
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  /* ===== CANVAS ===== */
+  #gameCanvas {
+    position: fixed; inset: 0;
+    z-index: 1;
+    display: block;
+  }
+
+  /* ===== HUD ===== */
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    padding: 12px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(10,22,40,0.8), transparent);
+  }
+  .hud-block {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .hud-label {
+    font-size: 0.6rem; color: var(--text-dim);
+    letter-spacing: 0.15em; text-transform: uppercase;
+  }
+  .hud-value {
+    font-family: var(--font-display);
+    font-size: 1.4rem; color: var(--gold);
+    text-shadow: 0 0 12px rgba(245,197,24,0.3);
+  }
+  #hud-center {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    text-align: center;
+  }
+  #progress-bar {
+    width: 120px; height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px; overflow: hidden; margin-top: 6px;
+  }
+  #progress-fill {
+    width: 0%; height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--success));
+    transition: width 0.1s linear;
+  }
+
+  /* ===== TOUCH ZONES (Invisible but functional) ===== */
+  .touch-zone {
+    position: fixed; top: 80px; bottom: 100px; z-index: 5;
+    width: 28%; opacity: 0;
+    cursor: pointer;
+  }
+  #touch-left { left: 0; }
+  #touch-right { right: 0; }
+  #touch-accel {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 5;
+    height: 100px; opacity: 0;
+    cursor: pointer;
+  }
+
+  /* ===== ACCELERATOR PEDAL (Visual) ===== */
+  #pedal-zone {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 8;
+    height: 90px;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(10,22,40,0.9), transparent);
+  }
+  #pedal {
+    width: 80px; height: 80px; border-radius: 50%;
+    border: 2px solid var(--text-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    transition: all 0.15s ease;
+    background: rgba(255,255,255,0.03);
+  }
+  #pedal.active {
+    border-color: var(--gold);
+    background: rgba(245,197,24,0.1);
+    box-shadow: 0 0 30px rgba(245,197,24,0.2);
+    transform: scale(0.92);
+  }
+  #pedal-hint {
+    position: absolute; bottom: 12px;
+    font-size: 0.6rem; color: var(--text-dim);
+    letter-spacing: 0.2em; text-transform: uppercase;
+  }
+
+  /* ===== STEERING HINTS ===== */
+  .steering-hint {
+    position: fixed; top: 50%; z-index: 6;
+    transform: translateY(-50%);
+    font-size: 2rem; color: var(--text-dim);
+    opacity: 0.15; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  #steer-left { left: 20px; }
+  #steer-right { right: 20px; }
+  .steering-hint.active { opacity: 0.6; }
+
+  /* ===== SCREENS ===== */
+  .screen {
+    position: fixed; inset: 0; z-index: 100;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+  }
+  .screen.active { display: flex; }
+
+  .screen-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(245,197,24,0.3);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+  .screen-sub {
+    font-size: 0.85rem; color: var(--text-dim);
+    margin-bottom: 36px; text-align: center;
+    max-width: 320px; line-height: 1.7;
+  }
+  .screen-btn {
+    padding: 16px 48px;
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+  }
+  .screen-btn:hover {
+    background: var(--gold);
+    color: var(--ocean-deep);
+    box-shadow: 0 0 30px rgba(245,197,24,0.3);
+  }
+
+  /* Win screen specific */
+  #win-screen .screen-title { color: var(--success); text-shadow: 0 0 30px rgba(34,197,94,0.3); }
+  #win-screen .screen-btn { border-color: var(--success); color: var(--success); }
+  #win-screen .screen-btn:hover { background: var(--success); color: var(--ocean-deep); }
+
+  /* Game over specific */
+  #gameover-screen .screen-title { color: var(--danger); text-shadow: 0 0 30px rgba(232,72,60,0.3); }
+  #gameover-screen .screen-btn { border-color: var(--danger); color: var(--danger); }
+  #gameover-screen .screen-btn:hover { background: var(--danger); color: var(--ocean-deep); }
+
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px; margin-bottom: 32px;
+  }
+  .stat-box {
+    text-align: center; padding: 12px 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.02);
+  }
+  .stat-box .val {
+    font-family: var(--font-display);
+    font-size: 1.3rem; color: var(--text);
+  }
+  .stat-box .lab {
+    font-size: 0.6rem; color: var(--text-dim);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 480px) {
+    .hud-value { font-size: 1.1rem; }
+    #pedal { width: 70px; height: 70px; }
+    .steering-hint { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CANVAS -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-block">
+    <div class="hud-label">Speed</div>
+    <div class="hud-value" id="speedDisplay">0 <span style="font-size:0.6rem">KTS</span></div>
+  </div>
+  <div id="hud-center">
+    <div class="hud-label">Distance to Port</div>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+  </div>
+  <div class="hud-block">
+    <div class="hud-label">Score</div>
+    <div class="hud-value" id="scoreDisplay">0</div>
+  </div>
+</div>
+
+<!-- Touch Zones (Invisible hit areas) -->
+<div class="touch-zone" id="touch-left"></div>
+<div class="touch-zone" id="touch-right"></div>
+<div id="touch-accel"></div>
+
+<!-- Visual Pedal -->
+<div id="pedal-zone">
+  <div id="pedal">⚡</div>
+  <div id="pedal-hint">Hold to Accelerate</div>
+</div>
+
+<!-- Steering Hints -->
+<div class="steering-hint" id="steer-left">◀</div>
+<div class="steering-hint" id="steer-right">▶</div>
+
+<!-- START SCREEN -->
+<div class="screen active" id="start-screen">
+  <div class="screen-title">SHARK BAY</div>
+  <div class="screen-sub">
+    Navigate through 5 lanes of deadly waters.<br>
+    Dodge sharks and rocks. Reach the safe port.<br>
+    <br>
+    <span style="color:var(--gold)">◀ ▶</span> Tap sides to steer<br>
+    <span style="color:var(--gold)">⚡</span> Hold bottom to accelerate
+  </div>
+  <button class="screen-btn" onclick="startGame()">START ENGINE</button>
+</div>
+
+<!-- WIN SCREEN -->
+<div class="screen" id="win-screen">
+  <div class="screen-title">PORT REACHED</div>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="val" id="win-score">0</div><div class="lab">Score</div></div>
+    <div class="stat-box"><div class="val" id="win-time">0s</div><div class="lab">Time</div></div>
+    <div class="stat-box"><div class="val" id="win-max">0</div><div class="lab">Max Speed</div></div>
+  </div>
+  <div class="screen-sub">Safe harbor achieved. Your portfolio awaits.</div>
+  <button class="screen-btn" onclick="goToPortfolio()">VIEW PORTFOLIO</button>
+  <button class="screen-btn" style="margin-top:12px;border-color:var(--text-dim);color:var(--text-dim)" onclick="restartGame()">RACE AGAIN</button>
+</div>
+
+<!-- GAME OVER SCREEN -->
+<div class="screen" id="gameover-screen">
+  <div class="screen-title">SHIP WRECKED</div>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="val" id="go-score">0</div><div class="lab">Score</div></div>
+    <div class="stat-box"><div class="val" id="go-dist">0m</div><div class="lab">Distance</div></div>
+    <div class="stat-box"><div class="val" id="go-max">0</div><div class="lab">Max Speed</div></div>
+  </div>
+  <div class="screen-sub" id="go-reason">You hit an obstacle.</div>
+  <button class="screen-btn" onclick="restartGame()">TRY AGAIN</button>
+</div>
+
+<script>
+// ========================
+// CONFIG
+// ========================
+const PORTFOLIO_URL = 'harsh-neural-portfolio.html';
+const TARGET_DISTANCE = 5000; // meters to win
+const LANE_COUNT = 5;
+const LANE_WIDTH = 80; // will scale
+const BOAT_WIDTH = 40;
+const BOAT_HEIGHT = 60;
+const MAX_SPEED = 18;
+const ACCEL_RATE = 0.25;
+const DECEL_RATE = 0.15;
+const STEER_SPEED = 6;
+const SPAWN_RATE = 45; // frames between spawns
+const OBSTACLE_SPEED_BASE = 4;
+
+// ========================
+// CANVAS SETUP
+// ========================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ========================
+// GAME STATE
+// ========================
+let gameState = 'start'; // start, playing, won, gameover
+let boat = { x: 0, y: 0, lane: 2, speed: 0, maxSpeed: 0 };
+let distance = 0;
+let score = 0;
+let startTime = 0;
+let obstacles = [];
+let particles = [];
+let waves = [];
+let frame = 0;
+let spawnTimer = 0;
+
+// Input
+let accelPressed = false;
+let steerLeft = false;
+let steerRight = false;
+
+// ========================
+// INPUT HANDLING
+// ========================
+const touchLeft = document.getElementById('touch-left');
+const touchRight = document.getElementById('touch-right');
+const touchAccel = document.getElementById('touch-accel');
+const pedal = document.getElementById('pedal');
+const steerLeftHint = document.getElementById('steer-left');
+const steerRightHint = document.getElementById('steer-right');
+
+// Touch / Mouse events
+function addPointerEvents(el, onStart, onEnd) {
+  el.addEventListener('touchstart', (e) => { e.preventDefault(); onStart(); });
+  el.addEventListener('touchend', (e) => { e.preventDefault(); onEnd(); });
+  el.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(); });
+  el.addEventListener('mouseup', (e) => { e.preventDefault(); onEnd(); });
+  el.addEventListener('mouseleave', onEnd);
+}
+
+addPointerEvents(touchAccel, 
+  () => { accelPressed = true; pedal.classList.add('active'); },
+  () => { accelPressed = false; pedal.classList.remove('active'); }
+);
+
+addPointerEvents(touchLeft,
+  () => { steerLeft = true; steerLeftHint.classList.add('active'); },
+  () => { steerLeft = false; steerLeftHint.classList.remove('active'); }
+);
+
+addPointerEvents(touchRight,
+  () => { steerRight = true; steerRightHint.classList.add('active'); },
+  () => { steerRight = false; steerRightHint.classList.remove('active'); }
+);
+
+// Keyboard
+window.addEventListener('keydown', (e) => {
+  if (gameState !== 'playing') return;
+  if (e.key === 'ArrowUp' || e.key === 'w') { accelPressed = true; pedal.classList.add('active'); }
+  if (e.key === 'ArrowLeft' || e.key === 'a') { steerLeft = true; steerLeftHint.classList.add('active'); }
+  if (e.key === 'ArrowRight' || e.key === 'd') { steerRight = true; steerRightHint.classList.add('active'); }
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowUp' || e.key === 'w') { accelPressed = false; pedal.classList.remove('active'); }
+  if (e.key === 'ArrowLeft' || e.key === 'a') { steerLeft = false; steerLeftHint.classList.remove('active'); }
+  if (e.key === 'ArrowRight' || e.key === 'd') { steerRight = false; steerRightHint.classList.remove('active'); }
+});
+
+// ========================
+// LANE MATH
+// ========================
+function getLaneCenter(laneIndex) {
+  const totalWidth = LANE_COUNT * LANE_WIDTH;
+  const startX = (canvas.width - totalWidth) / 2;
+  return startX + laneIndex * LANE_WIDTH + LANE_WIDTH / 2;
+}
+
+function getLaneX(laneIndex) {
+  const totalWidth = LANE_COUNT * LANE_WIDTH;
+  const startX = (canvas.width - totalWidth) / 2;
+  return startX + laneIndex * LANE_WIDTH;
+}
+
+// ========================
+// DRAW FUNCTIONS
+// ========================
+function drawOcean() {
+  // Deep ocean background
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  grad.addColorStop(0, '#0a1628');
+  grad.addColorStop(0.5, '#0d1f3a');
+  grad.addColorStop(1, '#143d6b');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Animated wave lines
+  ctx.strokeStyle = 'rgba(74, 159, 212, 0.08)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 8; i++) {
+    const y = ((frame * 2 + i * 80) % (canvas.height + 100)) - 50;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    for (let x = 0; x < canvas.width; x += 20) {
+      ctx.lineTo(x, y + Math.sin((x + frame * 3) * 0.02) * 8);
+    }
+    ctx.stroke();
+  }
+}
+
+function drawLanes() {
+  const totalWidth = LANE_COUNT * LANE_WIDTH;
+  const startX = (canvas.width - totalWidth) / 2;
+
+  // Lane dividers
+  ctx.strokeStyle = 'rgba(74, 159, 212, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([12, 18]);
+  ctx.lineDashOffset = -frame * 2;
+
+  for (let i = 1; i < LANE_COUNT; i++) {
+    const x = startX + i * LANE_WIDTH;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Side boundaries
+  ctx.strokeStyle = 'rgba(74, 159, 212, 0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(startX, 0);
+  ctx.lineTo(startX, canvas.height);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(startX + totalWidth, 0);
+  ctx.lineTo(startX + totalWidth, canvas.height);
+  ctx.stroke();
+
+  // Side water foam effect
+  ctx.fillStyle = 'rgba(74, 159, 212, 0.05)';
+  ctx.fillRect(0, 0, startX, canvas.height);
+  ctx.fillRect(startX + totalWidth, 0, canvas.width - startX - totalWidth, canvas.height);
+}
+
+function drawBoat() {
+  const x = boat.x;
+  const y = boat.y;
+  const w = BOAT_WIDTH;
+  const h = BOAT_HEIGHT;
+
+  // Wake particles
+  if (boat.speed > 2) {
+    for (let i = 0; i < 3; i++) {
+      particles.push({
+        x: x + (Math.random() - 0.5) * w * 0.5,
+        y: y + h / 2 + 5,
+        vx: (Math.random() - 0.5) * 1,
+        vy: 1 + Math.random() * 2,
+        life: 30 + Math.random() * 20,
+        maxLife: 50,
+        size: 2 + Math.random() * 3,
+        color: `rgba(74, 159, 212, ${0.3 + Math.random() * 0.3})`
+      });
+    }
+  }
+
+  // Boat shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + h / 2 + 8, w * 0.4, h * 0.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Boat hull
+  ctx.fillStyle = '#c4a35a';
+  ctx.beginPath();
+  ctx.moveTo(x - w / 2, y + h * 0.3);
+  ctx.lineTo(x + w / 2, y + h * 0.3);
+  ctx.lineTo(x + w * 0.35, y + h / 2);
+  ctx.lineTo(x - w * 0.35, y + h / 2);
+  ctx.closePath();
+  ctx.fill();
+
+  // Hull detail
+  ctx.strokeStyle = '#8b7355';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Boat body
+  ctx.fillStyle = '#e8dcc8';
+  ctx.beginPath();
+  ctx.moveTo(x - w / 2, y + h * 0.3);
+  ctx.lineTo(x - w * 0.4, y - h * 0.3);
+  ctx.lineTo(x + w * 0.4, y - h * 0.3);
+  ctx.lineTo(x + w / 2, y + h * 0.3);
+  ctx.closePath();
+  ctx.fill();
+
+  // Cabin
+  ctx.fillStyle = '#f0e6d2';
+  ctx.fillRect(x - w * 0.2, y - h * 0.15, w * 0.4, h * 0.25);
+
+  // Window
+  ctx.fillStyle = '#4a9fd4';
+  ctx.fillRect(x - w * 0.12, y - h * 0.08, w * 0.24, h * 0.1);
+
+  // Stripe
+  ctx.fillStyle = '#e8483c';
+  ctx.fillRect(x - w * 0.4, y + h * 0.05, w * 0.8, 3);
+
+  // Mast
+  ctx.strokeStyle = '#8b7355';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y - h * 0.3);
+  ctx.lineTo(x, y - h * 0.7);
+  ctx.stroke();
+
+  // Flag
+  ctx.fillStyle = '#e8483c';
+  ctx.beginPath();
+  ctx.moveTo(x, y - h * 0.7);
+  ctx.lineTo(x + 12, y - h * 0.65);
+  ctx.lineTo(x, y - h * 0.6);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawObstacle(obs) {
+  const x = obs.x;
+  const y = obs.y;
+
+  if (obs.type === 'rock') {
+    // Rock
+    ctx.fillStyle = '#5a5a5a';
+    ctx.beginPath();
+    ctx.moveTo(x - 15, y + 10);
+    ctx.lineTo(x - 10, y - 15);
+    ctx.lineTo(x + 5, y - 18);
+    ctx.lineTo(x + 18, y - 8);
+    ctx.lineTo(x + 12, y + 12);
+    ctx.closePath();
+    ctx.fill();
+
+    // Highlight
+    ctx.fillStyle = '#7a7a7a';
+    ctx.beginPath();
+    ctx.moveTo(x - 8, y - 5);
+    ctx.lineTo(x - 5, y - 12);
+    ctx.lineTo(x + 2, y - 14);
+    ctx.lineTo(x + 5, y - 6);
+    ctx.closePath();
+    ctx.fill();
+
+    // Warning glow
+    ctx.strokeStyle = 'rgba(232, 72, 60, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (obs.type === 'shark') {
+    // Shark fin
+    ctx.fillStyle = '#2a3a4a';
+    ctx.beginPath();
+    ctx.moveTo(x - 12, y + 5);
+    ctx.lineTo(x, y - 20);
+    ctx.lineTo(x + 12, y + 5);
+    ctx.closePath();
+    ctx.fill();
+
+    // Fin highlight
+    ctx.fillStyle = '#3a4a5a';
+    ctx.beginPath();
+    ctx.moveTo(x - 5, y + 2);
+    ctx.lineTo(x, y - 15);
+    ctx.lineTo(x + 3, y + 2);
+    ctx.closePath();
+    ctx.fill();
+
+    // Water ripple
+    ctx.strokeStyle = 'rgba(74, 159, 212, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(x, y + 8, 18, 6, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawFinishLine() {
+  if (distance < TARGET_DISTANCE - 200) return;
+  const progress = (distance / TARGET_DISTANCE);
+  const y = canvas.height - (progress * canvas.height) + 100;
+
+  if (y > -50 && y < canvas.height + 50) {
+    // Checkered pattern
+    const size = 20;
+    for (let i = 0; i < LANE_COUNT * LANE_WIDTH / size; i++) {
+      for (let j = 0; j < 3; j++) {
+        ctx.fillStyle = (i + j) % 2 === 0 ? '#f5c518' : '#fff';
+        const lx = getLaneX(0) + i * size;
+        ctx.fillRect(lx, y + j * size, size, size);
+      }
+    }
+
+    // "PORT" text
+    ctx.fillStyle = 'rgba(245, 197, 24, 0.9)';
+    ctx.font = 'bold 16px "Black Ops One"';
+    ctx.textAlign = 'center';
+    ctx.fillText('⚓ SAFE PORT ⚓', canvas.width / 2, y - 10);
+  }
+}
+
+function drawParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+    const alpha = p.life / p.maxLife;
+
+    ctx.fillStyle = p.color.replace(/[\d.]+\)$/, alpha + ')');
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function drawSpeedLines() {
+  if (boat.speed < 8) return;
+  ctx.strokeStyle = `rgba(255, 255, 255, ${(boat.speed / MAX_SPEED) * 0.15})`;
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    const len = 20 + Math.random() * 40;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y + len);
+    ctx.stroke();
+  }
+}
+
+// ========================
+// GAME LOGIC
+// ========================
+function spawnObstacle() {
+  const lane = Math.floor(Math.random() * LANE_COUNT);
+  const type = Math.random() > 0.4 ? 'rock' : 'shark';
+  obstacles.push({
+    x: getLaneCenter(lane),
+    y: -50,
+    lane: lane,
+    type: type,
+    width: 35,
+    height: 35
+  });
+}
+
+function checkCollision() {
+  for (const obs of obstacles) {
+    const dx = Math.abs(boat.x - obs.x);
+    const dy = Math.abs(boat.y - obs.y);
+    if (dx < (BOAT_WIDTH + obs.width) / 2 * 0.7 && dy < (BOAT_HEIGHT + obs.height) / 2 * 0.7) {
+      return obs.type;
+    }
+  }
+  return null;
+}
+
+function update() {
+  if (gameState !== 'playing') return;
+
+  frame++;
+
+  // Acceleration
+  if (accelPressed) {
+    boat.speed = Math.min(boat.speed + ACCEL_RATE, MAX_SPEED);
+  } else {
+    boat.speed = Math.max(boat.speed - DECEL_RATE, 0);
+  }
+  boat.maxSpeed = Math.max(boat.maxSpeed, boat.speed);
+
+  // Steering
+  const targetLane = boat.lane;
+  if (steerLeft && boat.lane > 0 && frame % 8 === 0) boat.lane--;
+  if (steerRight && boat.lane < LANE_COUNT - 1 && frame % 8 === 0) boat.lane++;
+
+  // Smooth lane transition
+  const targetX = getLaneCenter(boat.lane);
+  boat.x += (targetX - boat.x) * 0.15;
+
+  // Distance & score
+  distance += boat.speed * 0.5;
+  score += Math.floor(boat.speed * 0.1);
+
+  // Spawn obstacles
+  spawnTimer++;
+  const currentSpawnRate = Math.max(20, SPAWN_RATE - Math.floor(distance / 500));
+  if (spawnTimer > currentSpawnRate) {
+    spawnObstacle();
+    spawnTimer = 0;
+  }
+
+  // Move obstacles
+  const obsSpeed = OBSTACLE_SPEED_BASE + boat.speed * 0.3 + (distance / TARGET_DISTANCE) * 3;
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    obstacles[i].y += obsSpeed;
+    if (obstacles[i].y > canvas.height + 50) {
+      obstacles.splice(i, 1);
+      score += 10; // Bonus for dodging
+    }
+  }
+
+  // Check collision
+  const hit = checkCollision();
+  if (hit) {
+    gameOver(hit);
+    return;
+  }
+
+  // Check win
+  if (distance >= TARGET_DISTANCE) {
+    winGame();
+    return;
+  }
+
+  // Update HUD
+  document.getElementById('speedDisplay').innerHTML = Math.floor(boat.speed * 2) + ' <span style="font-size:0.6rem">KTS</span>';
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('progress-fill').style.width = Math.min(100, (distance / TARGET_DISTANCE) * 100) + '%';
+}
+
+// ========================
+// GAME STATE FUNCTIONS
+// ========================
+function startGame() {
+  gameState = 'playing';
+  boat = { x: getLaneCenter(2), y: canvas.height - 120, lane: 2, speed: 0, maxSpeed: 0 };
+  distance = 0;
+  score = 0;
+  obstacles = [];
+  particles = [];
+  frame = 0;
+  spawnTimer = 0;
+  startTime = Date.now();
+
+  document.getElementById('start-screen').classList.remove('active');
+  document.getElementById('win-screen').classList.remove('active');
+  document.getElementById('gameover-screen').classList.remove('active');
+}
+
+function winGame() {
+  gameState = 'won';
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  document.getElementById('win-score').textContent = score;
+  document.getElementById('win-time').textContent = elapsed + 's';
+  document.getElementById('win-max').textContent = Math.floor(boat.maxSpeed * 2) + ' KTS';
+  document.getElementById('win-screen').classList.add('active');
+}
+
+function gameOver(reason) {
+  gameState = 'gameover';
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  document.getElementById('go-score').textContent = score;
+  document.getElementById('go-dist').textContent = Math.floor(distance) + 'm';
+  document.getElementById('go-max').textContent = Math.floor(boat.maxSpeed * 2) + ' KTS';
+  document.getElementById('go-reason').textContent = reason === 'shark' ? 'A shark took your hull.' : 'You crashed into rocks.';
+  document.getElementById('gameover-screen').classList.add('active');
+}
+
+function restartGame() {
+  startGame();
+}
+
+function goToPortfolio() {
+  window.location.href = PORTFOLIO_URL;
+}
+
+// ========================
+// RENDER LOOP
+// ========================
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawOcean();
+  drawLanes();
+  drawFinishLine();
+
+  if (gameState === 'playing' || gameState === 'won' || gameState === 'gameover') {
+    // Draw obstacles
+    for (const obs of obstacles) {
+      drawObstacle(obs);
+    }
+
+    // Draw boat
+    drawBoat();
+
+    // Draw particles
+    drawParticles();
+
+    // Speed lines
+    drawSpeedLines();
+  }
+
+  update();
+  requestAnimationFrame(render);
+}
+
+// Start render loop
+render();
+
+// Initial boat position
+boat.x = getLaneCenter(2);
+boat.y = canvas.height - 120;
+</script>
+</body>
+</html>

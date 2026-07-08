@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HARSHLABS.AI // INDUSTRIAL SPEC SHEET</title>
+    
+    <!-- Heavy Monospace & Brutalist Grotesk Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Syne:wght@800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        brutal: ['"Syne"', 'sans-serif'],
+                    },
+                    colors: {
+                        void: '#050505',
+                        acid: '#00ff66',
+                        steel: '#1a1a1a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            overflow-x: hidden;
+        }
+        .grid-bg {
+            background-size: 20px 20px;
+            background-image: 
+                linear-gradient(to right, #141414 1px, transparent 1px),
+                linear-gradient(to bottom, #141414 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="grid-bg min-h-screen p-6 md:p-12 flex flex-col justify-between border-8 border-acid select-none">
+
+    <!-- TOP META METRICS -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-white/20 pb-6 gap-4 font-mono text-xs text-neutral-400 uppercase tracking-widest">
+        <div class="flex items-center space-x-3">
+            <span class="inline-block w-3 h-3 bg-acid animate-pulse"></span>
+            <span class="text-white font-bold">SYS_STATUS: DETERMINISTIC // ONLINE</span>
+        </div>
+        <div>
+            <span>LOC: DELHI, IN // 28.6139° N, 77.2090° E</span>
+        </div>
+        <div class="text-acid font-bold">
+            [ ARCHITECT_ID: HARSH KUMAR ]
+        </div>
+    </header>
+
+    <!-- MAIN BRUTALIST IDENTIFIER -->
+    <main class="my-12">
+        <div class="border-l-4 border-acid pl-4 mb-4 text-neutral-400 font-mono text-xs md:text-sm uppercase tracking-widest">
+            // ELIMINATING INDETERMINISTIC HUMAN FRICTION
+        </div>
+        
+        <h1 class="font-brutal text-6xl sm:text-8xl md:text-9xl font-extrabold tracking-tighter text-white uppercase leading-none mb-6">
+            HARSH<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-500 to-neutral-800">LABS.AI</span>
+        </h1>
+
+        <p class="font-mono text-lg md:text-2xl text-neutral-300 max-w-3xl leading-tight border-t-2 border-white/20 pt-6">
+            We do not write passive software. We architect <span class="text-acid font-bold">autonomous digital workforces</span>. Replacing scale-limiting operational bottlenecks with zero-latency execution.
+        </p>
+
+        <!-- RAW SYSTEM ARCHITECTURE MATRIX -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-0 mt-12 border-2 border-white/30 divide-y md:divide-y-0 md:divide-x-2 divide-white/30 bg-void">
+            
+            <!-- Module 1 -->
+            <div class="p-6 md:p-8 hover:bg-steel transition-colors">
+                <div class="text-acid font-mono text-sm font-bold mb-4 flex justify-between">
+                    <span>[MOD_01]</span>
+                    <span>→</span>
+                </div>
+                <h3 class="font-brutal text-xl font-bold text-white uppercase mb-2">Extraction Engines</h3>
+                <p class="font-mono text-xs text-neutral-400 leading-relaxed">
+                    Multi-threaded, high-resilience scraping architectures engineered to bypass complex anti-bot mitigation and harvest proprietary market data at scale.
+                </p>
+                <div class="mt-6 pt-4 border-t border-white/10 font-mono text-[10px] text-acid uppercase tracking-wider">
+                    OUTPUT: 10K+ TARGETS / WK
+                </div>
+            </div>
+
+            <!-- Module 2 -->
+            <div class="p-6 md:p-8 hover:bg-steel transition-colors">
+                <div class="text-acid font-mono text-sm font-bold mb-4 flex justify-between">
+                    <span>[MOD_02]</span>
+                    <span>→</span>
+                </div>
+                <h3 class="font-brutal text-xl font-bold text-white uppercase mb-2">LLM Core Integration</h3>
+                <p class="font-mono text-xs text-neutral-400 leading-relaxed">
+                    Local and cloud-deployed deterministic AI agents bound to custom business logic. Zero hallucinations. Pure, structured JSON output execution.
+                </p>
+                <div class="mt-6 pt-4 border-t border-white/10 font-mono text-[10px] text-acid uppercase tracking-wider">
+                    LATENCY: &lt; 200MS EXECUTION
+                </div>
+            </div>
+
+            <!-- Module 3 -->
+            <div class="p-6 md:p-8 hover:bg-steel transition-colors">
+                <div class="text-acid font-mono text-sm font-bold mb-4 flex justify-between">
+                    <span>[MOD_03]</span>
+                    <span>→</span>
+                </div>
+                <h3 class="font-brutal text-xl font-bold text-white uppercase mb-2">Systematic Velocity</h3>
+                <p class="font-mono text-xs text-neutral-400 leading-relaxed">
+                    Complete eradication of manual onboarding, data sorting, and administrative drag. Your operational pipeline running 24/7/365 without human fatigue.
+                </p>
+                <div class="mt-6 pt-4 border-t border-white/10 font-mono text-[10px] text-acid uppercase tracking-wider">
+                    EFFICIENCY: 99.8% AUTONOMY
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- TERMINAL COMMAND CTA -->
+    <footer class="border-t-2 border-white/20 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div class="font-mono text-xs text-neutral-500 max-w-md">
+            <p class="text-white font-bold mb-1">// PROPRIETARY ARCHITECTURE</p>
+            <p>Deployment of these systems requires an uncompromising operational audit. We do not service traditional retail businesses.</p>
+        </div>
+
+        <div class="w-full md:w-auto flex flex-col sm:flex-row items-stretch gap-0 border-2 border-acid bg-void">
+            <div class="px-6 py-4 font-mono text-sm text-neutral-400 flex items-center bg-steel/50 border-b sm:border-b-0 sm:border-r border-acid/40">
+                <span class="text-acid mr-2">&gt;</span> harshlabs.ai/initiate
+            </div>
+            <a href="https://harshlabs.ai" class="px-8 py-4 bg-acid hover:bg-white text-void font-mono font-extrabold text-sm uppercase tracking-wider text-center transition-colors flex items-center justify-center">
+                EXECUTE AUDIT →
+            </a>
+        </div>
+    </footer>
+
+</body>
+</html>

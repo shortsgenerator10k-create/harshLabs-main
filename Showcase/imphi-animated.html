@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IMPHI Products — Earn While We Work</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#FF6B00;
+  --orange2:#FF8C00;
+  --orange-light:#FFF0E0;
+  --white:#FFFFFF;
+  --dark:#1A1A1A;
+  --gray:#666;
+  --light:#F8F8F8;
+}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--dark);overflow-x:hidden}
+section{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:60px 5%}
+
+/* ===== NAV ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:999;display:flex;align-items:center;justify-content:space-between;padding:16px 5%;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:2px solid var(--orange)}
+.logo{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--orange);letter-spacing:-1px}
+.nav-cta{background:var(--orange);color:white;padding:10px 22px;border-radius:8px;font-weight:700;font-size:0.85rem;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.2s}
+.nav-cta:hover{transform:scale(1.05);box-shadow:0 6px 20px rgba(255,107,0,0.4)}
+
+/* ===== SECTION 1 - HERO ===== */
+#hero{background:var(--white);text-align:center}
+.hero-eyebrow{font-size:0.8rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--orange);margin-bottom:1.5rem;opacity:0;animation:fadeUp 0.6s 0.2s forwards}
+.hero-headline{font-family:'Syne',sans-serif;font-size:clamp(3rem,8vw,7rem);font-weight:800;line-height:1;letter-spacing:-3px;margin-bottom:2rem}
+.word{display:inline-block;overflow:hidden;margin-right:0.2em}
+.word span{display:block;opacity:0;transform:translateY(100%);animation:wordUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards}
+.word:nth-child(1) span{animation-delay:0.3s}
+.word:nth-child(2) span{animation-delay:0.45s;color:var(--orange)}
+.word:nth-child(3) span{animation-delay:0.6s}
+.word:nth-child(4) span{animation-delay:0.75s;color:var(--orange)}
+@keyframes wordUp{to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.hero-sub{font-size:1.1rem;color:var(--gray);max-width:500px;margin:0 auto 3rem;line-height:1.6;opacity:0;animation:fadeUp 0.6s 1s forwards;transform:translateY(20px)}
+.hero-pills{display:flex;gap:0.7rem;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp 0.6s 1.2s forwards;transform:translateY(20px)}
+.pill{background:var(--orange-light);border:2px solid var(--orange);color:var(--orange);padding:8px 18px;border-radius:100px;font-size:0.82rem;font-weight:700;animation:pillPop 0.4s ease backwards}
+.pill:nth-child(1){animation-delay:1.3s}
+.pill:nth-child(2){animation-delay:1.45s}
+.pill:nth-child(3){animation-delay:1.6s}
+.pill:nth-child(4){animation-delay:1.75s}
+@keyframes pillPop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;animation:fadeUp 0.6s 2s forwards}
+.scroll-hint p{font-size:0.72rem;color:var(--gray);letter-spacing:2px;text-transform:uppercase}
+.scroll-arrow{width:20px;height:20px;border-right:2px solid var(--orange);border-bottom:2px solid var(--orange);transform:rotate(45deg);animation:bounce 1.5s infinite}
+@keyframes bounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(5px)}}
+/* Orange burst bg */
+.hero-burst{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,0,0.08) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;animation:burstPulse 4s ease-in-out infinite}
+@keyframes burstPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+
+/* ===== SECTION 2 - FACTORY ===== */
+#factory{background:#FFF8F3;flex-direction:column}
+.factory-label{font-size:0.75rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--orange);margin-bottom:1rem}
+.factory-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,3.2rem);font-weight:800;text-align:center;margin-bottom:0.5rem;letter-spacing:-1px}
+.factory-sub{color:var(--gray);font-size:0.95rem;margin-bottom:3rem;text-align:center}
+.factory-scene{width:100%;max-width:800px;height:300px;background:white;border-radius:24px;border:2px solid #FFE0CC;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(255,107,0,0.1)}
+
+/* Conveyor belt */
+.belt{position:absolute;bottom:60px;left:0;right:0;height:18px;background:linear-gradient(90deg,#e0e0e0 0%,#ccc 50%,#e0e0e0 100%);overflow:hidden}
+.belt::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0px,transparent 30px,rgba(0,0,0,0.08) 30px,rgba(0,0,0,0.08) 32px);animation:beltMove 1s linear infinite}
+@keyframes beltMove{from{background-position:0}to{background-position:-32px 0}}
+.belt-stand{position:absolute;bottom:0;width:14px;background:#888;border-radius:3px}
+.belt-stand.left{left:40px;height:60px}
+.belt-stand.right{right:40px;height:60px}
+.belt-base{position:absolute;bottom:0;left:30px;right:30px;height:8px;background:#777;border-radius:4px}
+
+/* Factory floor */
+.factory-floor{position:absolute;bottom:0;left:0;right:0;height:58px;background:#F0EDE8;border-top:3px solid #DDD}
+
+/* Worker 1 */
+.worker{position:absolute;bottom:78px}
+.worker1{left:15%}
+.worker2{left:50%;transform:translateX(-50%)}
+.worker3{right:15%}
+.worker-body{position:relative;animation:workerBob 1.2s ease-in-out infinite}
+.w-head{width:22px;height:22px;background:#FF8C42;border-radius:50%;margin:0 auto 2px}
+.w-torso{width:26px;height:32px;background:#FF6B00;border-radius:4px 4px 0 0;margin:0 auto;position:relative}
+.w-torso::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:18px;height:4px;background:#E55A00;border-radius:2px}
+.w-arm-l,.w-arm-r{width:8px;height:20px;background:#FF8C42;border-radius:4px;position:absolute;top:4px}
+.w-arm-l{left:-7px;transform-origin:top center;animation:armLeft 0.6s ease-in-out infinite alternate}
+.w-arm-r{right:-7px;transform-origin:top center;animation:armRight 0.6s ease-in-out infinite alternate}
+@keyframes armLeft{from{transform:rotate(-30deg)}to{transform:rotate(10deg)}}
+@keyframes armRight{from{transform:rotate(30deg)}to{transform:rotate(-10deg)}}
+@keyframes workerBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.w-legs{display:flex;gap:4px;justify-content:center;margin-top:1px}
+.w-leg{width:9px;height:18px;background:#CC5500;border-radius:0 0 3px 3px;animation:legWalk 0.6s ease-in-out infinite}
+.w-leg:last-child{animation-direction:reverse}
+@keyframes legWalk{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.worker-hat{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:26px;height:10px;background:#FFB347;border-radius:3px;z-index:2}
+.worker-hat::after{content:'';position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:18px;height:8px;background:#FFB347;border-radius:2px}
+
+/* Moving boxes on belt */
+.moving-box{position:absolute;bottom:78px;width:36px;height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;animation:boxMove 4s linear infinite}
+.box1{animation-delay:0s;background:#FF6B00}
+.box2{animation-delay:1.3s;background:#FF8C00}
+.box3{animation-delay:2.6s;background:#FFA040}
+@keyframes boxMove{0%{left:-40px;opacity:0}5%{opacity:1}90%{opacity:1}100%{left:calc(100% + 40px);opacity:0}}
+
+/* Checkmark pop */
+.check-pop{position:absolute;font-size:1.4rem;animation:checkAnim 4s linear infinite;pointer-events:none}
+.check1{bottom:130px;left:30%;animation-delay:1s}
+.check2{bottom:130px;left:60%;animation-delay:2.5s}
+@keyframes checkAnim{0%,40%{opacity:0;transform:scale(0) translateY(0)}45%{opacity:1;transform:scale(1.2) translateY(0)}55%{opacity:1;transform:scale(1) translateY(-10px)}65%{opacity:0;transform:scale(0.8) translateY(-20px)}100%{opacity:0}}
+
+/* Factory bg elements */
+.factory-window{position:absolute;top:20px;left:20px;width:60px;height:50px;border:3px solid #DDD;border-radius:4px;display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px;background:#f5f5f5}
+.factory-window div{background:rgba(135,206,235,0.5);border-radius:2px}
+.factory-shelf{position:absolute;top:30px;right:20px;display:flex;gap:6px}
+.shelf-box{width:20px;height:20px;border-radius:3px;animation:shelfBounce 2s ease-in-out infinite}
+.shelf-box:nth-child(1){background:#FF6B00;animation-delay:0s}
+.shelf-box:nth-child(2){background:#FFB347;animation-delay:0.3s}
+.shelf-box:nth-child(3){background:#FF8C00;animation-delay:0.6s}
+@keyframes shelfBounce{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.1)}}
+
+/* ===== SECTION 3 - PLATFORMS ===== */
+#platforms{background:var(--white)}
+.plat-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:800;text-align:center;letter-spacing:-1px;margin-bottom:0.5rem}
+.plat-sub{color:var(--gray);text-align:center;margin-bottom:4rem;font-size:0.95rem}
+.platform-arena{width:100%;max-width:900px;position:relative;height:320px}
+/* Center product */
+.center-product{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:10}
+.cp-box{width:80px;height:80px;background:linear-gradient(135deg,var(--orange),var(--orange2));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 8px;box-shadow:0 10px 30px rgba(255,107,0,0.35);animation:cpPulse 2s ease-in-out infinite}
+@keyframes cpPulse{0%,100%{transform:scale(1);box-shadow:0 10px 30px rgba(255,107,0,0.35)}50%{transform:scale(1.07);box-shadow:0 15px 40px rgba(255,107,0,0.5)}}
+.cp-label{font-weight:700;font-size:0.8rem;color:var(--dark)}
+/* Platform nodes */
+.plat-node{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pn-amazon{top:50%;left:0;transform:translateY(-50%)}
+.pn-flipkart{top:0;left:50%;transform:translateX(-50%)}
+.pn-meesho{bottom:0;left:50%;transform:translateX(-50%)}
+.pn-icon{width:70px;height:70px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:900;letter-spacing:-0.5px;font-family:'Syne',sans-serif;box-shadow:0 8px 25px rgba(0,0,0,0.12)}
+.pn-amazon .pn-icon{background:#FF9900;color:white}
+.pn-flipkart .pn-icon{background:#2874F0;color:white}
+.pn-meesho .pn-icon{background:#F43397;color:white}
+.pn-label{font-size:0.75rem;font-weight:700;color:var(--gray)}
+.pn-settle{font-size:0.7rem;background:var(--orange-light);color:var(--orange);padding:3px 8px;border-radius:100px;font-weight:700}
+/* Flying product */
+.fly-product{position:absolute;width:30px;height:30px;border-radius:8px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:0.9rem;pointer-events:none;top:50%;left:50%;transform:translate(-50%,-50%)}
+.fly1{animation:flyToAmazon 3s ease-in-out infinite}
+.fly2{animation:flyToFlipkart 3s ease-in-out 1s infinite}
+.fly3{animation:flyToMeesho 3s ease-in-out 2s infinite}
+@keyframes flyToAmazon{
+  0%{top:50%;left:50%;transform:translate(-50%,-50%) scale(1);opacity:1}
+  60%{top:50%;left:8%;transform:translate(0,-50%) scale(0.7);opacity:1}
+  80%{top:50%;left:8%;transform:translate(0,-50%) scale(1.3);opacity:0.8}
+  100%{top:50%;left:8%;transform:translate(0,-50%) scale(0);opacity:0}
+}
+@keyframes flyToFlipkart{
+  0%{top:50%;left:50%;transform:translate(-50%,-50%) scale(1);opacity:1}
+  60%{top:5%;left:50%;transform:translate(-50%,0) scale(0.7);opacity:1}
+  80%{top:5%;left:50%;transform:translate(-50%,0) scale(1.3);opacity:0.8}
+  100%{top:5%;left:50%;transform:translate(-50%,0) scale(0);opacity:0}
+}
+@keyframes flyToMeesho{
+  0%{top:50%;left:50%;transform:translate(-50%,-50%) scale(1);opacity:1}
+  60%{top:88%;left:50%;transform:translate(-50%,0) scale(0.7);opacity:1}
+  80%{top:88%;left:50%;transform:translate(-50%,0) scale(1.3);opacity:0.8}
+  100%{top:88%;left:50%;transform:translate(-50%,0) scale(0);opacity:0}
+}
+/* Connection lines */
+.conn-line{position:absolute;top:50%;left:50%;width:160px;height:2px;transform-origin:left center;opacity:0.2}
+.conn-line.to-amazon{transform:rotate(180deg)}
+.conn-line.to-flipkart{transform:rotate(-90deg)}
+.conn-line.to-meesho{transform:rotate(90deg)}
+.dashed-line{width:100%;height:2px;background:repeating-linear-gradient(90deg,var(--orange) 0,var(--orange) 8px,transparent 8px,transparent 14px);animation:dashFlow 1s linear infinite}
+@keyframes dashFlow{to{background-position:14px 0}}
+
+/* ===== SECTION 4 - MONEY ===== */
+#money{background:#FFF8F3}
+.money-label{font-size:0.75rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;text-align:center}
+.money-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:800;text-align:center;letter-spacing:-1px;margin-bottom:4rem}
+.money-stage{display:flex;flex-direction:column;align-items:center;gap:2rem;width:100%;max-width:700px}
+/* Big counter */
+.profit-counter-wrap{text-align:center}
+.profit-prefix{font-size:2rem;color:var(--orange);font-family:'Syne',sans-serif;font-weight:800;vertical-align:middle}
+.profit-counter{font-family:'Syne',sans-serif;font-size:clamp(5rem,15vw,9rem);font-weight:800;color:var(--orange);letter-spacing:-5px;line-height:1;display:inline-block}
+.profit-label{color:var(--gray);font-size:0.9rem;margin-top:-0.5rem}
+/* Coin rain */
+.coin-rain{position:absolute;top:0;left:0;right:0;height:100%;pointer-events:none;overflow:hidden}
+.coin{position:absolute;font-size:1.4rem;animation:coinFall linear infinite;opacity:0}
+@keyframes coinFall{0%{transform:translateY(-40px) rotate(0deg);opacity:1}80%{opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+/* Stats row */
+.money-stats{display:flex;gap:2rem;flex-wrap:wrap;justify-content:center}
+.mstat{text-align:center;background:white;border:2px solid #FFE0CC;border-radius:16px;padding:1.5rem 2rem}
+.mstat-num{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--orange)}
+.mstat-lbl{font-size:0.78rem;color:var(--gray);font-weight:600;margin-top:4px}
+/* Passive badge */
+.passive-badge{background:var(--orange);color:white;padding:12px 28px;border-radius:100px;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;display:inline-flex;align-items:center;gap:8px;animation:badgePop 2s ease-in-out infinite}
+@keyframes badgePop{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+/* ===== SECTION 5 - DELIVERY ===== */
+#delivery{background:var(--white);overflow:hidden}
+.del-label{font-size:0.75rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;text-align:center}
+.del-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:800;text-align:center;letter-spacing:-1px;margin-bottom:3rem}
+.delivery-scene{width:100%;max-width:700px;position:relative;height:280px}
+/* House */
+.house{position:absolute;right:8%;bottom:0;width:160px}
+.house-roof{width:0;height:0;border-left:80px solid transparent;border-right:80px solid transparent;border-bottom:70px solid var(--orange);margin-bottom:-2px}
+.house-body{width:160px;height:100px;background:#FFF0E0;border:3px solid #FFD0A0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:0}
+.house-door{width:35px;height:55px;background:#FF6B00;border-radius:6px 6px 0 0;margin:0 auto}
+.house-window{position:absolute;top:20px;left:15px;width:30px;height:30px;background:#87CEEB;border:3px solid #FFD0A0;border-radius:4px}
+.house-window2{position:absolute;top:20px;right:15px;width:30px;height:30px;background:#87CEEB;border:3px solid #FFD0A0;border-radius:4px}
+/* Delivery truck */
+.truck{position:absolute;bottom:0;left:-200px;display:flex;align-items:flex-end;animation:truckDrive 5s cubic-bezier(0.25,0.46,0.45,0.94) infinite}
+.truck-body{width:130px;height:80px;background:var(--orange);border-radius:8px 8px 0 0;position:relative;display:flex;align-items:center;justify-content:center}
+.truck-cabin{width:50px;height:65px;background:#FF8C00;border-radius:8px 0 0 0;position:absolute;left:-50px;bottom:0;display:flex;align-items:center;justify-content:center}
+.truck-window{width:30px;height:22px;background:#87CEEB;border-radius:4px;margin-top:-10px}
+.truck-wheel{width:28px;height:28px;border-radius:50%;background:#333;border:4px solid #666;position:absolute;bottom:-14px}
+.truck-wl{left:5px}
+.truck-wr{right:5px}
+.truck-label{color:white;font-family:'Syne',sans-serif;font-weight:800;font-size:0.75rem;text-align:center}
+@keyframes truckDrive{
+  0%{left:-200px}
+  40%{left:25%}
+  60%{left:25%}
+  75%{left:25%;opacity:1}
+  85%{left:-200px;opacity:0}
+  100%{left:-200px;opacity:1}
+}
+/* Package drop */
+.drop-pkg{position:absolute;bottom:80px;left:calc(25% + 40px);font-size:2rem;animation:pkgDrop 5s ease-in infinite}
+@keyframes pkgDrop{
+  0%,40%{opacity:0;transform:translateY(0)}
+  50%{opacity:1;transform:translateY(0)}
+  60%{opacity:1;transform:translateY(60px)}
+  65%{opacity:0;transform:translateY(60px)}
+  100%{opacity:0}
+}
+/* Customer */
+.customer{position:absolute;bottom:0;right:22%;display:flex;flex-direction:column;align-items:center}
+.cust-head{width:32px;height:32px;background:#FFB347;border-radius:50%;margin-bottom:2px;position:relative}
+.cust-happy{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-size:1.2rem;animation:happyBounce 5s ease-in-out infinite}
+@keyframes happyBounce{0%,45%{opacity:0;transform:translateX(-50%) scale(0)}55%{opacity:1;transform:translateX(-50%) scale(1.2)}70%{opacity:1;transform:translateX(-50%) scale(1)}85%,100%{opacity:0;transform:translateX(-50%) scale(0)}}
+.cust-body{width:30px;height:40px;background:#FF6B00;border-radius:4px 4px 0 0}
+.cust-legs{display:flex;gap:5px}
+.cust-leg{width:11px;height:22px;background:#CC5500;border-radius:0 0 3px 3px}
+/* Confetti */
+.confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.conf{position:absolute;width:8px;height:8px;animation:confFall linear infinite;opacity:0}
+@keyframes confFall{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:0}
+  5%{opacity:1}
+  80%{opacity:1}
+  100%{transform:translateY(320px) rotate(720deg);opacity:0}
+}
+/* Road */
+.road{position:absolute;bottom:0;left:0;right:0;height:40px;background:#DDD;border-top:4px solid #CCC}
+.road-line{position:absolute;top:50%;left:0;right:0;height:3px;overflow:hidden}
+.road-dash{height:3px;background:repeating-linear-gradient(90deg,white 0,white 30px,transparent 30px,transparent 50px);animation:roadAnim 1s linear infinite}
+@keyframes roadAnim{to{background-position:-50px 0}}
+.ground{position:absolute;bottom:40px;left:0;right:0;height:8px;background:#C8B89A}
+
+/* ===== SECTION 6 - CTA ===== */
+#cta{background:var(--orange);color:white;text-align:center}
+.cta-title{font-family:'Syne',sans-serif;font-size:clamp(2.5rem,6vw,5.5rem);font-weight:800;letter-spacing:-2px;line-height:1.1;margin-bottom:1.5rem}
+.cta-sub{font-size:1rem;opacity:0.85;margin-bottom:3rem;max-width:450px;margin-left:auto;margin-right:auto;line-height:1.6}
+.cta-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-white{background:white;color:var(--orange);padding:16px 36px;border-radius:12px;font-weight:800;font-size:1rem;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.3s;display:inline-flex;align-items:center;gap:8px}
+.btn-white:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(0,0,0,0.2)}
+.btn-outline-w{background:transparent;color:white;border:2px solid rgba(255,255,255,0.6);padding:16px 36px;border-radius:12px;font-weight:700;font-size:1rem;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.3s}
+.btn-outline-w:hover{background:rgba(255,255,255,0.1);border-color:white}
+.cta-trust{margin-top:3rem;display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;opacity:0.8}
+.ct-item{font-size:0.82rem;display:flex;align-items:center;gap:6px}
+/* Orange wave bg */
+.cta-wave{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+.cta-wave::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,0.05);top:-100px;left:-100px;animation:wavePulse 6s ease-in-out infinite}
+.cta-wave::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,0.05);bottom:-80px;right:-80px;animation:wavePulse 6s ease-in-out 3s infinite}
+@keyframes wavePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+
+/* ===== STICKY WA ===== */
+.wa-float{position:fixed;bottom:28px;right:28px;z-index:998;width:58px;height:58px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 6px 20px rgba(37,211,102,0.45);text-decoration:none;animation:waFloat 3s ease-in-out infinite}
+@keyframes waFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.wa-badge{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:red;color:white;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* ===== SECTION DOTS NAV ===== */
+.dot-nav{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:998;display:flex;flex-direction:column;gap:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:#DDD;cursor:pointer;transition:all 0.3s}
+.dot.active,.dot:hover{background:var(--orange);transform:scale(1.4)}
+
+@media(max-width:600px){
+  .platform-arena{height:260px}
+  .pn-icon{width:54px;height:54px;font-size:0.7rem}
+  .delivery-scene{height:220px}
+  .house{width:120px}.house-roof{border-left-width:60px;border-right-width:60px;border-bottom-width:55px}
+  .house-body{width:120px;height:80px}
+  .conn-line{width:100px}
+  .dot-nav{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">IMPHI</div>
+  <a href="#cta" class="nav-cta">Join Free →</a>
+</nav>
+
+<!-- DOT NAV -->
+<div class="dot-nav" id="dotNav">
+  <div class="dot active" onclick="goTo('hero')"></div>
+  <div class="dot" onclick="goTo('factory')"></div>
+  <div class="dot" onclick="goTo('platforms')"></div>
+  <div class="dot" onclick="goTo('money')"></div>
+  <div class="dot" onclick="goTo('delivery')"></div>
+  <div class="dot" onclick="goTo('cta')"></div>
+</div>
+
+<!-- ===== S1: HERO ===== -->
+<section id="hero">
+  <div class="hero-burst"></div>
+  <div style="position:relative;z-index:1;text-align:center">
+    <div class="hero-eyebrow">🇮🇳 IMPHI Products Pvt. Ltd.</div>
+    <h1 class="hero-headline">
+      <span class="word"><span>You</span></span>
+      <span class="word"><span>Earn.</span></span>
+      <span class="word"><span>We</span></span>
+      <span class="word"><span>Work.</span></span>
+    </h1>
+    <p class="hero-sub">Baby products. Real factory. Amazon, Flipkart & Meesho. Zero investment to start. Profit passive — every single day.</p>
+    <div class="hero-pills">
+      <span class="pill">🍼 Baby Jhula</span>
+      <span class="pill">🛏️ Paalna</span>
+      <span class="pill">👶 Diapers</span>
+      <span class="pill">₹0 to Start</span>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <p>scroll down</p>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ===== S2: FACTORY ===== -->
+<section id="factory">
+  <div class="factory-label">● Our Manufacturing Unit</div>
+  <h2 class="factory-title">Real Workers. Real Products.<br/>Real Business.</h2>
+  <p class="factory-sub">G-109, Sector 63, Noida — Come visit anytime. We're not hiding.</p>
+  <div class="factory-scene">
+    <!-- Background -->
+    <div class="factory-window"><div></div><div></div><div></div><div></div></div>
+    <div class="factory-shelf">
+      <div class="shelf-box"></div>
+      <div class="shelf-box"></div>
+      <div class="shelf-box"></div>
+    </div>
+    <!-- Workers -->
+    <div class="worker worker1">
+      <div class="worker-hat"></div>
+      <div class="worker-body">
+        <div class="w-head"></div>
+        <div class="w-torso">
+          <div class="w-arm-l"></div>
+          <div class="w-arm-r"></div>
+        </div>
+        <div class="w-legs"><div class="w-leg"></div><div class="w-leg"></div></div>
+      </div>
+    </div>
+    <div class="worker worker2">
+      <div class="worker-hat"></div>
+      <div class="worker-body">
+        <div class="w-head"></div>
+        <div class="w-torso">
+          <div class="w-arm-l"></div>
+          <div class="w-arm-r"></div>
+        </div>
+        <div class="w-legs"><div class="w-leg"></div><div class="w-leg"></div></div>
+      </div>
+    </div>
+    <div class="worker worker3">
+      <div class="worker-hat"></div>
+      <div class="worker-body">
+        <div class="w-head"></div>
+        <div class="w-torso">
+          <div class="w-arm-l"></div>
+          <div class="w-arm-r"></div>
+        </div>
+        <div class="w-legs"><div class="w-leg"></div><div class="w-leg"></div></div>
+      </div>
+    </div>
+    <!-- Conveyor -->
+    <div class="belt"></div>
+    <div class="belt-stand left"></div>
+    <div class="belt-stand right"></div>
+    <div class="belt-base"></div>
+    <!-- Moving boxes -->
+    <div class="moving-box box1">📦</div>
+    <div class="moving-box box2">🍼</div>
+    <div class="moving-box box3">📦</div>
+    <!-- Checkmarks -->
+    <div class="check-pop check1">✅</div>
+    <div class="check-pop check2">✅</div>
+    <!-- Floor -->
+    <div class="factory-floor"></div>
+  </div>
+</section>
+
+<!-- ===== S3: PLATFORMS ===== -->
+<section id="platforms">
+  <h2 class="plat-title">Your Products. 3 Platforms.<br/><span style="color:var(--orange)">Maximum Orders.</span></h2>
+  <p class="plat-sub">Listed, optimized & managed by our SEO team. You just track the sales.</p>
+  <div class="platform-arena">
+    <!-- Connection lines -->
+    <div class="conn-line to-amazon" style="top:50%;left:50%"><div class="dashed-line"></div></div>
+    <div class="conn-line to-flipkart" style="top:50%;left:50%"><div class="dashed-line"></div></div>
+    <div class="conn-line to-meesho" style="top:50%;left:50%"><div class="dashed-line"></div></div>
+    <!-- Center product -->
+    <div class="center-product">
+      <div class="cp-box">🍼</div>
+      <div class="cp-label">Your Product</div>
+    </div>
+    <!-- Platform nodes -->
+    <div class="plat-node pn-amazon">
+      <div class="pn-icon">amzn</div>
+      <div class="pn-label">Amazon</div>
+      <div class="pn-settle">10–15 Days</div>
+    </div>
+    <div class="plat-node pn-flipkart">
+      <div class="pn-icon">fkrt</div>
+      <div class="pn-label">Flipkart</div>
+      <div class="pn-settle">10–15 Days</div>
+    </div>
+    <div class="plat-node pn-meesho">
+      <div class="pn-icon">msho</div>
+      <div class="pn-label">Meesho</div>
+      <div class="pn-settle">7 Days ⚡</div>
+    </div>
+    <!-- Flying products -->
+    <div class="fly-product fly1">📦</div>
+    <div class="fly-product fly2">🍼</div>
+    <div class="fly-product fly3">📦</div>
+  </div>
+</section>
+
+<!-- ===== S4: MONEY ===== -->
+<section id="money">
+  <div class="coin-rain" id="coinRain"></div>
+  <div class="money-label">● Pure Passive Profit</div>
+  <h2 class="money-title">Watch Your Money<br/><span style="color:var(--orange)">Grow.</span></h2>
+  <div class="money-stage">
+    <div class="profit-counter-wrap">
+      <span class="profit-prefix">₹</span>
+      <span class="profit-counter" id="profitCounter">0</span>
+      <div class="profit-label">monthly partner earnings (avg)</div>
+    </div>
+    <div class="money-stats">
+      <div class="mstat">
+        <div class="mstat-num">300+</div>
+        <div class="mstat-lbl">Products Listed</div>
+      </div>
+      <div class="mstat">
+        <div class="mstat-num">3 Days</div>
+        <div class="mstat-lbl">Go Live</div>
+      </div>
+      <div class="mstat">
+        <div class="mstat-num">₹0</div>
+        <div class="mstat-lbl">To Start</div>
+      </div>
+    </div>
+    <div class="passive-badge">💰 Investment Only After Profit Starts</div>
+  </div>
+</section>
+
+<!-- ===== S5: DELIVERY ===== -->
+<section id="delivery">
+  <div class="del-label">● Customer Gets. You Win.</div>
+  <h2 class="del-title">Every Order Delivered.<br/><span style="color:var(--orange)">Every Rupee Yours.</span></h2>
+  <div class="delivery-scene">
+    <div class="confetti-wrap" id="confettiWrap"></div>
+    <!-- Road -->
+    <div class="road">
+      <div class="road-line"><div class="road-dash"></div></div>
+    </div>
+    <div class="ground"></div>
+    <!-- Truck -->
+    <div class="truck" id="truck">
+      <div class="truck-cabin"><div class="truck-window"></div></div>
+      <div class="truck-body">
+        <div class="truck-label">IMPHI📦</div>
+        <div class="truck-wheel truck-wl"></div>
+        <div class="truck-wheel truck-wr"></div>
+      </div>
+    </div>
+    <!-- Drop package -->
+    <div class="drop-pkg">📦</div>
+    <!-- House -->
+    <div class="house">
+      <div class="house-roof"></div>
+      <div class="house-body">
+        <div class="house-window"></div>
+        <div class="house-window2"></div>
+        <div class="house-door"></div>
+      </div>
+    </div>
+    <!-- Customer -->
+    <div class="customer">
+      <div class="cust-happy">😊</div>
+      <div class="cust-head"></div>
+      <div class="cust-body"></div>
+      <div class="cust-legs">
+        <div class="cust-leg"></div>
+        <div class="cust-leg"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S6: CTA ===== -->
+<section id="cta">
+  <div class="cta-wave"></div>
+  <div style="position:relative;z-index:1;text-align:center;width:100%">
+    <h2 class="cta-title">Start Earning.<br/>Zero Risk.</h2>
+    <p class="cta-sub">Join the IMPHI partner network. Live on Amazon, Flipkart & Meesho in 3 days. No investment until profit begins.</p>
+    <div class="cta-buttons">
+      <a href="https://wa.me/917827544610?text=Hi%20IMPHI%2C%20I%20want%20to%20join%20your%20dropshipping%20network!" class="btn-white" target="_blank">💬 WhatsApp Us Now</a>
+      <a href="tel:+917827544610" class="btn-outline-w">📞 Call +91 78275 44610</a>
+    </div>
+    <div class="cta-trust">
+      <span class="ct-item">✅ GST Registered</span>
+      <span class="ct-item">🏭 Own Factory — Noida</span>
+      <span class="ct-item">📍 G-109, Sector 63</span>
+      <span class="ct-item">⭐ 5 Years Experience</span>
+    </div>
+  </div>
+</section>
+
+<!-- WA Float -->
+<a href="https://wa.me/917827544610" class="wa-float" target="_blank">
+  💬<div class="wa-badge">1</div>
+</a>
+
+<script>
+// ===== DOT NAV =====
+const sections = ['hero','factory','platforms','money','delivery','cta'];
+const dots = document.querySelectorAll('.dot');
+function goTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const idx = sections.indexOf(e.target.id);
+      dots.forEach(d=>d.classList.remove('active'));
+      if(idx>=0) dots[idx].classList.add('active');
+      // trigger counter
+      if(e.target.id==='money') startCounter();
+    }
+  });
+},{threshold:0.5});
+sections.forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el)});
+
+// ===== PROFIT COUNTER =====
+let counterStarted=false;
+function startCounter(){
+  if(counterStarted)return;
+  counterStarted=true;
+  const el=document.getElementById('profitCounter');
+  const target=42000;
+  const duration=2500;
+  const step=target/(duration/16);
+  let current=0;
+  const interval=setInterval(()=>{
+    current=Math.min(current+step,target);
+    el.textContent=Math.floor(current).toLocaleString('en-IN');
+    if(current>=target){
+      clearInterval(interval);
+      // restart after pause
+      setTimeout(()=>{
+        counterStarted=false;
+        el.textContent='0';
+        setTimeout(startCounter,500);
+      },3000);
+    }
+  },16);
+}
+
+// ===== COIN RAIN =====
+const coinWrap=document.getElementById('coinRain');
+const coins=['💰','🪙','💵','💸'];
+for(let i=0;i<18;i++){
+  const c=document.createElement('div');
+  c.className='coin';
+  c.textContent=coins[Math.floor(Math.random()*coins.length)];
+  c.style.left=Math.random()*100+'%';
+  c.style.animationDuration=(3+Math.random()*4)+'s';
+  c.style.animationDelay=Math.random()*5+'s';
+  c.style.fontSize=(0.9+Math.random()*0.8)+'rem';
+  coinWrap.appendChild(c);
+}
+
+// ===== CONFETTI =====
+const confWrap=document.getElementById('confettiWrap');
+const confColors=['#FF6B00','#FFB347','#FF8C00','#FFA500','#FF4500','#FFD700'];
+for(let i=0;i<22;i++){
+  const c=document.createElement('div');
+  c.className='conf';
+  c.style.left=Math.random()*100+'%';
+  c.style.background=confColors[Math.floor(Math.random()*confColors.length)];
+  c.style.borderRadius=Math.random()>0.5?'50%':'0';
+  c.style.animationDuration=(2+Math.random()*3)+'s';
+  c.style.animationDelay=(Math.random()*5+5)+'s';
+  c.style.width=(6+Math.random()*6)+'px';
+  c.style.height=(6+Math.random()*6)+'px';
+  confWrap.appendChild(c);
+}
+</script>
+</body>
+</html>

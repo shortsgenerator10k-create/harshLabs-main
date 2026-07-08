@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harsh — Neural Systems Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<style>
+  :root {
+    --bg: #030305;
+    --surface: rgba(255,255,255,0.025);
+    --surface-hover: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.15);
+    --text: #f0f0f5;
+    --text-dim: rgba(240,240,245,0.55);
+    --text-dimmer: rgba(240,240,245,0.3);
+    --accent: #6366f1;
+    --accent-glow: rgba(99,102,241,0.4);
+    --accent2: #ec4899;
+    --success: #22c55e;
+    --font: 'Inter', -apple-system, sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --theme-transition: background 0.8s ease, color 0.5s ease;
+  }
+
+  /* === THEME: WARM ARCHITECT === */
+  body.theme-warm {
+    --bg: #0c0a08;
+    --accent: #d97706;
+    --accent-glow: rgba(217,119,6,0.35);
+    --accent2: #f59e0b;
+    --surface: rgba(255,255,255,0.02);
+    --border: rgba(255,255,255,0.05);
+  }
+
+  /* === THEME: CYBERPUNK === */
+  body.theme-cyber {
+    --bg: #00111a;
+    --accent: #00f0ff;
+    --accent-glow: rgba(0,240,255,0.35);
+    --accent2: #ff00a0;
+    --surface: rgba(0,240,255,0.03);
+    --border: rgba(0,240,255,0.08);
+    --text: #e0f7ff;
+    --text-dim: rgba(224,247,255,0.55);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+    transition: var(--theme-transition);
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+  /* ===== LOADER ===== */
+  #loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 24px;
+    transition: opacity 1s ease, visibility 1s;
+  }
+  #loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+  .loader-brain {
+    width: 60px; height: 60px;
+    border: 2px solid rgba(255,255,255,0.08);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: brainSpin 1.2s linear infinite;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  @keyframes brainSpin { to { transform: rotate(360deg); } }
+  .loader-text {
+    font-family: var(--mono); font-size: 0.8rem;
+    color: var(--text-dim); letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .loader-sub {
+    font-size: 0.7rem; color: var(--text-dimmer);
+    font-family: var(--mono);
+  }
+
+  /* ===== THEME SWITCHER ===== */
+  .theme-bar {
+    position: fixed; top: 20px; right: 24px; z-index: 200;
+    display: flex; gap: 8px;
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px;
+  }
+  .theme-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid transparent; cursor: pointer;
+    transition: all 0.3s; position: relative;
+  }
+  .theme-btn:hover { transform: scale(1.1); }
+  .theme-btn.active { border-color: var(--text); box-shadow: 0 0 12px rgba(255,255,255,0.2); }
+  .theme-btn[data-theme="default"] { background: linear-gradient(135deg, #6366f1, #ec4899); }
+  .theme-btn[data-theme="warm"] { background: linear-gradient(135deg, #d97706, #f59e0b); }
+  .theme-btn[data-theme="cyber"] { background: linear-gradient(135deg, #00f0ff, #ff00a0); }
+  .theme-label {
+    position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 0.6rem;
+    color: var(--text-dimmer); white-space: nowrap;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  }
+  .theme-btn:hover .theme-label { opacity: 1; }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 18px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(3,3,5,0.6);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transition: var(--theme-transition);
+  }
+  .nav-brand {
+    font-family: var(--font-display); font-size: 1.1rem; font-weight: 600;
+    display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em;
+  }
+  .nav-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent-glow);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a {
+    color: var(--text-dim); text-decoration: none;
+    font-size: 0.82rem; font-weight: 400;
+    transition: color 0.2s; position: relative; font-family: var(--mono);
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 1px; background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    padding: 9px 20px; border-radius: 6px;
+    border: 1px solid var(--border-hover);
+    background: var(--surface);
+    color: var(--text); font-family: var(--font);
+    font-size: 0.8rem; cursor: pointer;
+    transition: all 0.2s; text-decoration: none;
+  }
+  .nav-cta:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  .mobile-menu-btn {
+    display: none; background: none; border: none;
+    color: var(--text); font-size: 1.4rem; cursor: pointer;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; padding: 120px 24px 80px;
+    position: relative; overflow: hidden;
+  }
+  #brain-canvas {
+    position: absolute; inset: 0; z-index: 1;
+    pointer-events: all;
+  }
+  .hero-content {
+    position: relative; z-index: 2; max-width: 800px;
+    pointer-events: none;
+  }
+  .hero-content > * { pointer-events: auto; }
+  .hero-eyebrow {
+    font-family: var(--mono); font-size: 0.75rem;
+    color: var(--accent); letter-spacing: 0.25em;
+    text-transform: uppercase; margin-bottom: 24px;
+    display: inline-block;
+    padding: 8px 18px; border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 100px; background: rgba(99,102,241,0.04);
+    backdrop-filter: blur(8px);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    font-weight: 700; line-height: 1.05;
+    letter-spacing: -0.04em; margin-bottom: 24px;
+  }
+  .hero h1 .gradient-text {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    color: var(--text-dim); max-width: 540px;
+    margin: 0 auto 40px; line-height: 1.75;
+    font-weight: 300;
+  }
+  .hero-btns {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 14px 32px; border-radius: 8px;
+    font-family: var(--font); font-size: 0.9rem;
+    font-weight: 500; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all 0.3s ease; border: none;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+    box-shadow: 0 4px 30px var(--accent-glow);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px var(--accent-glow);
+  }
+  .btn-ghost {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+  }
+  .hero-hint {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 0.7rem;
+    color: var(--text-dimmer); letter-spacing: 0.1em;
+    z-index: 2; pointer-events: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-hint::before, .hero-hint::after {
+    content: ''; width: 30px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--text-dimmer));
+  }
+  .hero-hint::after {
+    background: linear-gradient(90deg, var(--text-dimmer), transparent);
+  }
+
+  /* ===== SECTIONS ===== */
+  section { padding: 100px 24px; max-width: 1140px; margin: 0 auto; }
+  .section-header {
+    margin-bottom: 64px; text-align: center;
+  }
+  .section-tag {
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--accent); letter-spacing: 0.2em;
+    text-transform: uppercase; margin-bottom: 14px;
+    display: inline-block;
+    padding: 6px 14px; border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 100px; background: rgba(99,102,241,0.03);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 600; letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .section-desc {
+    color: var(--text-dim); max-width: 520px;
+    margin: 0 auto; font-size: 1rem; line-height: 1.7;
+  }
+
+  /* ===== STATS ===== */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 20px; padding: 40px 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; margin: 60px auto;
+    max-width: 920px; backdrop-filter: blur(10px);
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 700;
+    color: var(--accent); margin-bottom: 6px;
+    text-shadow: 0 0 20px var(--accent-glow);
+  }
+  .stat-label {
+    font-size: 0.72rem; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    font-family: var(--mono);
+  }
+
+  /* ===== JOURNEY ===== */
+  .timeline {
+    position: relative; padding-left: 44px;
+  }
+  .timeline::before {
+    content: ''; position: absolute; left: 14px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), transparent);
+  }
+  .timeline-item {
+    position: relative; margin-bottom: 56px;
+    padding-left: 36px;
+  }
+  .timeline-item:last-child { margin-bottom: 0; }
+  .timeline-dot {
+    position: absolute; left: -38px; top: 4px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-glow);
+    transition: var(--theme-transition);
+  }
+  .timeline-item:nth-child(2) .timeline-dot { border-color: var(--accent2); box-shadow: 0 0 0 4px rgba(236,72,153,0.2); }
+  .timeline-item:nth-child(3) .timeline-dot { border-color: var(--success); box-shadow: 0 0 0 4px rgba(34,197,94,0.2); }
+  .timeline-date {
+    font-family: var(--mono); font-size: 0.7rem;
+    color: var(--text-dimmer); letter-spacing: 0.1em;
+    margin-bottom: 8px; text-transform: uppercase;
+  }
+  .timeline-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem; font-weight: 600; margin-bottom: 10px;
+  }
+  .timeline-desc {
+    color: var(--text-dim); font-size: 0.95rem; line-height: 1.75;
+    max-width: 520px;
+  }
+  .timeline-tag {
+    display: inline-block; margin-top: 12px;
+    padding: 4px 12px; border-radius: 4px;
+    font-family: var(--mono); font-size: 0.68rem;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  /* ===== SKILLS ===== */
+  .skills-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .skill-card {
+    padding: 28px; border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.35s ease;
+    position: relative; overflow: hidden;
+  }
+  .skill-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .skill-card:hover::before { opacity: 1; }
+  .skill-card:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px -10px rgba(0,0,0,0.4);
+  }
+  .skill-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+  }
+  .skill-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    opacity: 0.15;
+  }
+  .skill-name { font-weight: 600; font-size: 1rem; }
+  .skill-desc {
+    font-size: 0.87rem; color: var(--text-dim); line-height: 1.65;
+  }
+
+  /* ===== PROJECTS ===== */
+  .filter-bar {
+    display: flex; gap: 10px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 44px;
+  }
+  .filter-btn {
+    padding: 8px 20px; border-radius: 100px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); font-family: var(--font);
+    font-size: 0.82rem; cursor: pointer;
+    transition: all 0.25s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+    color: var(--text);
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  .project-card {
+    border-radius: 16px; overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    cursor: pointer; position: relative;
+  }
+  .project-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    border-color: var(--border-hover);
+    box-shadow: 0 24px 48px -12px rgba(0,0,0,0.5);
+  }
+  .project-card::after {
+    content: ''; position: absolute; inset: 0;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    transition: border-color 0.3s;
+    pointer-events: none;
+  }
+  .project-card:hover::after {
+    border-color: rgba(99,102,241,0.2);
+  }
+  .project-thumb {
+    width: 100%; height: 200px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(236,72,153,0.08));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.8rem; position: relative; overflow: hidden;
+    transition: var(--theme-transition);
+  }
+  .project-thumb::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(3,3,5,0.7), transparent 50%);
+  }
+  .project-info { padding: 24px; }
+  .project-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+  .project-desc {
+    font-size: 0.85rem; color: var(--text-dim);
+    line-height: 1.6; margin-bottom: 16px;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .project-tags {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .project-tag {
+    padding: 3px 10px; border-radius: 4px;
+    font-family: var(--mono); font-size: 0.65rem;
+    background: rgba(99,102,241,0.06);
+    border: 1px solid rgba(99,102,241,0.12);
+    color: var(--accent);
+  }
+
+  /* ===== SERVICES ===== */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .service-card {
+    padding: 32px; border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.35s ease; position: relative;
+    overflow: hidden;
+  }
+  .service-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .service-card:hover::before { opacity: 1; }
+  .service-card:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px -12px rgba(0,0,0,0.4);
+  }
+  .service-num {
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--text-dimmer); margin-bottom: 16px;
+    letter-spacing: 0.1em;
+  }
+  .service-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 600; margin-bottom: 12px;
+  }
+  .service-desc {
+    font-size: 0.88rem; color: var(--text-dim); line-height: 1.7;
+  }
+  .service-price {
+    margin-top: 20px; padding-top: 18px;
+    border-top: 1px dashed var(--border);
+    font-family: var(--mono); font-size: 0.82rem;
+    color: var(--accent); font-weight: 500;
+  }
+
+  /* ===== CONTACT ===== */
+  .contact-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 48px; align-items: start;
+  }
+  .contact-info h3 {
+    font-family: var(--font-display);
+    font-size: 1.4rem; font-weight: 600; margin-bottom: 20px;
+  }
+  .contact-info p {
+    color: var(--text-dim); font-size: 0.95rem;
+    line-height: 1.75; margin-bottom: 28px;
+  }
+  .contact-link {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px; border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    margin-bottom: 12px; text-decoration: none; color: var(--text);
+    transition: all 0.25s;
+  }
+  .contact-link:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+    transform: translateX(4px);
+  }
+  .contact-link-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    opacity: 0.15;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .contact-link-text { font-size: 0.92rem; font-weight: 500; }
+  .contact-link-sub { font-size: 0.75rem; color: var(--text-dim); }
+
+  .contact-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px; padding: 36px;
+  }
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block; font-size: 0.8rem;
+    font-weight: 500; margin-bottom: 8px;
+    color: var(--text-dim); font-family: var(--mono);
+  }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%; padding: 14px 16px;
+    border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    color: var(--text); font-family: var(--font);
+    font-size: 0.9rem; outline: none;
+    transition: all 0.2s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .form-group textarea { resize: vertical; min-height: 110px; }
+  .form-submit {
+    width: 100%; padding: 16px;
+    border-radius: 10px; border: none;
+    background: var(--accent); color: #fff;
+    font-family: var(--font); font-size: 0.95rem;
+    font-weight: 600; cursor: pointer;
+    transition: all 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .form-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px var(--accent-glow);
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px 24px; text-align: center;
+  }
+  .footer-text {
+    font-size: 0.8rem; color: var(--text-dimmer);
+    font-family: var(--mono); line-height: 1.8;
+  }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(16px);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px; opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .modal-overlay.active {
+    display: flex; opacity: 1;
+  }
+  .modal-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px; max-width: 540px; width: 100%;
+    overflow: hidden;
+    transform: scale(0.92) translateY(30px);
+    transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+    position: relative;
+  }
+  .modal-overlay.active .modal-box {
+    transform: scale(1) translateY(0);
+  }
+  .modal-img {
+    width: 100%; height: 220px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(236,72,153,0.15));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem; position: relative;
+    transition: var(--theme-transition);
+  }
+  .modal-body { padding: 32px; }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem; font-weight: 600; margin-bottom: 12px;
+  }
+  .modal-desc { color: var(--text-dim); font-size: 0.93rem; line-height: 1.75; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 12px; }
+  .modal-actions .btn { flex: 1; justify-content: center; }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+    color: #fff; font-size: 1.4rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; z-index: 10;
+    backdrop-filter: blur(8px);
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.6); transform: rotate(90deg); }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 768px) {
+    .theme-bar { top: 14px; right: 14px; }
+    nav { padding: 14px 18px; }
+    .nav-links { display: none; }
+    .mobile-menu-btn { display: block; }
+    .hero { padding: 100px 18px 60px; }
+    section { padding: 60px 18px; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 24px; padding: 28px 20px; }
+    .timeline { padding-left: 32px; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: clamp(2rem, 8vw, 3rem); }
+  }
+
+  /* Reveal */
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: all 0.9s cubic-bezier(0.16,1,0.3,1);
+  }
+  .reveal.visible {
+    opacity: 1; transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-brain"></div>
+  <div class="loader-text">Neural Systems Initializing</div>
+  <div class="loader-sub">v2.0 // Harsh Portfolio Hub</div>
+</div>
+
+<!-- THEME SWITCHER -->
+<div class="theme-bar">
+  <button class="theme-btn active" data-theme="default" onclick="setTheme('default')">
+    <span class="theme-label">Neural</span>
+  </button>
+  <button class="theme-btn" data-theme="warm" onclick="setTheme('warm')">
+    <span class="theme-label">Architect</span>
+  </button>
+  <button class="theme-btn" data-theme="cyber" onclick="setTheme('cyber')">
+    <span class="theme-label">Cyber</span>
+  </button>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-brand">
+    <div class="nav-dot"></div>
+    <span>Harsh</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#journey">Journey</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Let's Talk</a>
+  <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <canvas id="brain-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Neural Systems Architect</div>
+    <h1>I engineer <span class="gradient-text">intelligence</span><br>into business.</h1>
+    <p class="hero-sub">
+      3 years of operations, sales, and code. From counting cement bags to deploying
+      AI neural networks. I don't write prompts — I architect outcomes.
+    </p>
+    <div class="hero-btns">
+      <a href="#work" class="btn btn-primary">Explore the Grid →</a>
+      <a href="#contact" class="btn btn-ghost">Initiate Protocol</a>
+    </div>
+  </div>
+  <div class="hero-hint">Drag to rotate neural mesh · Scroll to enter</div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar reveal">
+  <div class="stat"><div class="stat-num">3+</div><div class="stat-label">Years Runtime</div></div>
+  <div class="stat"><div class="stat-num">15+</div><div class="stat-label">Modules Built</div></div>
+  <div class="stat"><div class="stat-num">100+</div><div class="stat-label">Assets Generated</div></div>
+  <div class="stat"><div class="stat-num">20</div><div class="stat-label">Cycles Complete</div></div>
+</div>
+
+<!-- JOURNEY -->
+<section id="journey">
+  <div class="section-header reveal">
+    <div class="section-tag">Execution Log</div>
+    <h2 class="section-title">From Munshi to Machine</h2>
+    <p class="section-desc">No degree. No safety net. Just 3 years of doing what others outsource.</p>
+  </div>
+  <div class="timeline reveal">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">2022 — Delhi, India</div>
+      <div class="timeline-title">The Munshi Phase</div>
+      <div class="timeline-desc">
+        Managed a construction supply shop. Tracked bricks, sand, cement, and cash flow daily.
+        Learned that a business is just a system of inputs and outputs — and that most owners
+        have zero visibility into their own numbers.
+      </div>
+      <span class="timeline-tag">Operations DNA</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">2023 — Noida, UP</div>
+      <div class="timeline-title">The Sales Engine</div>
+      <div class="timeline-desc">
+        Telecaller for 1 year. Learned rejection psychology, pitch refinement, and how
+        corporate sales pipelines actually work. Discovered that the best CRM is useless
+        without a human who understands the buyer.
+      </div>
+      <span class="timeline-tag">Sales DNA</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">2024 — Present</div>
+      <div class="timeline-title">The Builder Era</div>
+      <div class="timeline-desc">
+        Self-taught HTML, CSS, JS, n8n, Make.com, and AI prompting. Built 15+ HTML pages,
+        an Opal AI blog generator, automation systems, and 100+ visual assets.
+        Now I sell the systems I built for myself.
+      </div>
+      <span class="timeline-tag">Builder DNA</span>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header reveal">
+    <div class="section-tag">Capabilities</div>
+    <h2 class="section-title">Neural Capabilities</h2>
+    <p class="section-desc">Not buzzwords. These are the tools I ship with.</p>
+  </div>
+  <div class="skills-grid reveal">
+    <div class="skill-card">
+      <div class="skill-header">
+        <div class="skill-icon">⚡</div>
+        <div class="skill-name">AI Automation</div>
+      </div>
+      <div class="skill-desc">n8n, Make.com, custom AI agents, WhatsApp/Instagram bots, and workflow pipelines that replace manual work permanently.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-header">
+        <div class="skill-icon">🧠</div>
+        <div class="skill-name">Prompt Engineering</div>
+      </div>
+      <div class="skill-desc">Image generation, video scripts, blog templates, and copy systems. I treat prompting as system design, not magic spells.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-header">
+        <div class="skill-icon">💻</div>
+        <div class="skill-name">Web Architecture</div>
+      </div>
+      <div class="skill-desc">Landing pages, mini web apps, HTML/CSS/JS builds, and Three.js experiences. No WordPress. Pure code. Maximum control.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-header">
+        <div class="skill-icon">📊</div>
+        <div class="skill-name">Sales Systems</div>
+      </div>
+      <div class="skill-desc">Cold outreach automation, lead enrichment, CRM setup, and pitch frameworks built from 1 year in the corporate trenches.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-header">
+        <div class="skill-icon">🎯</div>
+        <div class="skill-name">Visual Systems</div>
+      </div>
+      <div class="skill-desc">Flyers, templates, social clips, PDFs, and brand assets. I create what the client needs, not what looks good in a Behance gallery.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-header">
+        <div class="skill-icon">🔮</div>
+        <div class="skill-name">Strategic Debug</div>
+      </div>
+      <div class="skill-desc">I debug business problems first, then pick the tool. Most freelancers pick the tool first and hope it fits the problem.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section id="work">
+  <div class="section-header reveal">
+    <div class="section-tag">Portfolio Grid</div>
+    <h2 class="section-title">Selected Modules</h2>
+    <p class="section-desc">15+ builds. These are the ones that matter.</p>
+  </div>
+  <div class="filter-bar reveal">
+    <button class="filter-btn active" data-filter="all">All Systems</button>
+    <button class="filter-btn" data-filter="web">Web</button>
+    <button class="filter-btn" data-filter="ai">AI Tools</button>
+    <button class="filter-btn" data-filter="visual">Visual</button>
+    <button class="filter-btn" data-filter="automation">Automation</button>
+  </div>
+  <div class="projects-grid reveal" id="projectsGrid"></div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-header reveal">
+    <div class="section-tag">Deployments</div>
+    <h2 class="section-title">Systems for Sale</h2>
+    <p class="section-desc">Flat fee. No hidden charges. Delivered in days, not weeks.</p>
+  </div>
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <div class="service-num">SYS.01</div>
+      <div class="service-title">AI Landing Page</div>
+      <div class="service-desc">A complete, conversion-focused landing page with AI-generated copy, responsive design, and form integration. Ready to deploy.</div>
+      <div class="service-price">Starting at ₹4,999</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">SYS.02</div>
+      <div class="service-title">WhatsApp/Instagram Bot</div>
+      <div class="service-desc">Automated reply bot with menu flows, lead capture, and human handoff. Built on n8n or Make.com with your business logic.</div>
+      <div class="service-price">Starting at ₹7,999</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">SYS.03</div>
+      <div class="service-title">Outreach Automation System</div>
+      <div class="service-desc">Lead scraping, enrichment, personalized cold email/LinkedIn sequences, and follow-up logic. You get the n8n workflow file.</div>
+      <div class="service-price">Starting at ₹9,999</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">SYS.04</div>
+      <div class="service-title">Visual Asset Pack</div>
+      <div class="service-desc">10 flyers, 5 social templates, 1 brand PDF, and 20 AI-generated images. Everything you need for a 30-day content calendar.</div>
+      <div class="service-price">Starting at ₹3,499</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">SYS.05</div>
+      <div class="service-title">Mini Web App</div>
+      <div class="service-desc">Custom HTML/CSS/JS tool — blog generator, quote calculator, portfolio, or dashboard. Self-contained, no monthly fees.</div>
+      <div class="service-price">Starting at ₹6,999</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">SYS.06</div>
+      <div class="service-title">The Full Stack</div>
+      <div class="service-desc">Everything above, bundled. Landing page + bot + outreach system + visual pack. For businesses ready to scale in 30 days.</div>
+      <div class="service-price">Starting at ₹24,999</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header reveal">
+    <div class="section-tag">Handshake Protocol</div>
+    <h2 class="section-title">Initialize Contact</h2>
+    <p class="section-desc">Free 15-minute audit. No pitch. Just honest feedback on what you should automate first.</p>
+  </div>
+  <div class="contact-grid reveal">
+    <div class="contact-info">
+      <h3>Direct Lines</h3>
+      <p>I respond within 24 hours. If I can't help, I'll tell you who can. No ghosting.</p>
+      <a href="https://wa.me/919999999999" target="_blank" class="contact-link">
+        <div class="contact-link-icon">💬</div>
+        <div>
+          <div class="contact-link-text">WhatsApp</div>
+          <div class="contact-link-sub">Fastest response</div>
+        </div>
+      </a>
+      <a href="mailto:harsh@example.com" class="contact-link">
+        <div class="contact-link-icon">✉️</div>
+        <div>
+          <div class="contact-link-text">Email</div>
+          <div class="contact-link-sub">harsh@example.com</div>
+        </div>
+      </a>
+      <a href="#" class="contact-link">
+        <div class="contact-link-icon">🔗</div>
+        <div>
+          <div class="contact-link-text">LinkedIn</div>
+          <div class="contact-link-sub">Professional updates</div>
+        </div>
+      </a>
+      <a href="#" class="contact-link">
+        <div class="contact-link-icon">📍</div>
+        <div>
+          <div class="contact-link-text">Location</div>
+          <div class="contact-link-sub">Delhi NCR, India</div>
+        </div>
+      </a>
+    </div>
+    <div class="contact-form">
+      <form onsubmit="handleForm(event)">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" placeholder="Rahul Sharma" required>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp / Phone</label>
+          <input type="tel" placeholder="+91 98765 43210" required>
+        </div>
+        <div class="form-group">
+          <label>What do you need?</label>
+          <select required>
+            <option value="">Select a system...</option>
+            <option>AI Landing Page</option>
+            <option>WhatsApp/Instagram Bot</option>
+            <option>Outreach Automation</option>
+            <option>Visual Asset Pack</option>
+            <option>Mini Web App</option>
+            <option>The Full Stack</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tell me about your business</label>
+          <textarea placeholder="I run a coaching center in Noida and need a lead capture system..."></textarea>
+        </div>
+        <button type="submit" class="form-submit">Transmit Message →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-text">
+    Built with Three.js + pure HTML/CSS/JS + caffeine.<br>
+    No templates. No WordPress. No excuses. © 2024 Harsh.
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-img" id="modalImg">🖼️</div>
+    <div class="modal-body">
+      <h3 class="modal-title" id="modalTitle">Project Title</h3>
+      <p class="modal-desc" id="modalDesc">Project description goes here.</p>
+      <div class="modal-actions">
+        <a href="#" class="btn btn-primary" id="modalLink" target="_blank">View Live →</a>
+        <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  // ========================
+  // PROJECTS DATA
+  // ========================
+  const projects = [
+    {
+      id: 1, title: "Opal AI Blog Generator",
+      desc: "A mini web app that generates complete blog HTML templates from a topic and niche input. Built for content creators who need fast, structured output.",
+      category: "ai", icon: "📝", link: "#"
+    },
+    {
+      id: 2, title: "3D Neural Gallery",
+      desc: "An interactive Three.js gallery showcasing service offerings in a cylindrical 3D space with drag-to-rotate and click-to-expand cards.",
+      category: "web", icon: "🎨", link: "#"
+    },
+    {
+      id: 3, title: "WhatsApp Lead Bot",
+      desc: "Automated WhatsApp bot for a real estate client. Handles property inquiries, captures lead details, and routes hot leads to the sales team instantly.",
+      category: "automation", icon: "🤖", link: "#"
+    },
+    {
+      id: 4, title: "Sahayak Filing Desk",
+      desc: "A documentation consultancy landing page for PMEGP and CGTMSE loan filing. Clean, trust-building design with case-file tabs and process timelines.",
+      category: "web", icon: "📋", link: "#"
+    },
+    {
+      id: 5, title: "Instagram Auto-DM System",
+      desc: "n8n workflow that auto-responds to Instagram story mentions and DMs with personalized messages based on keyword triggers.",
+      category: "automation", icon: "📩", link: "#"
+    },
+    {
+      id: 6, title: "Brand Visual Pack — 50 Assets",
+      desc: "Complete visual identity package for a Delhi-based coaching center. Flyers, social templates, story frames, and a brand guidelines PDF.",
+      category: "visual", icon: "🎯", link: "#"
+    },
+    {
+      id: 7, title: "Cold Outreach Engine",
+      desc: "Lead scraping from IndiaMART + AI-enriched personalization + automated email sequences. Built for a B2B packaging company in Noida.",
+      category: "automation", icon: "🚀", link: "#"
+    },
+    {
+      id: 8, title: "Portfolio Hub System",
+      desc: "This very site — a self-contained, single-file portfolio with animated hero, filterable project grid, modal system, and contact form.",
+      category: "web", icon: "💼", link: "#"
+    }
+  ];
+
+  // ========================
+  // RENDER PROJECTS
+  // ========================
+  function renderProjects(filter = 'all') {
+    const grid = document.getElementById('projectsGrid');
+    const filtered = filter === 'all' ? projects : projects.filter(p => p.category === filter);
+    grid.innerHTML = filtered.map(p => `
+      <div class="project-card" onclick="openModal(${p.id})">
+        <div class="project-thumb">${p.icon}</div>
+        <div class="project-info">
+          <div class="project-title">${p.title}</div>
+          <div class="project-desc">${p.desc}</div>
+          <div class="project-tags">
+            <span class="project-tag">${p.category.toUpperCase()}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderProjects();
+
+  // ========================
+  // FILTER BUTTONS
+  // ========================
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProjects(btn.dataset.filter);
+    });
+  });
+
+  // ========================
+  // MODAL
+  // ========================
+  window.openModal = function(id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = p.title;
+    document.getElementById('modalDesc').textContent = p.desc;
+    document.getElementById('modalImg').textContent = p.icon;
+    document.getElementById('modalLink').href = p.link;
+    document.getElementById('modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeModal = function(e) {
+    if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close')) return;
+    document.getElementById('modal').classList.remove('active');
+    document.body.style.overflow = '';
+  };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeModal(); });
+
+  // ========================
+  // FORM
+  // ========================
+  window.handleForm = function(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('.form-submit');
+    const original = btn.textContent;
+    btn.textContent = 'Message Transmitted ✓';
+    btn.style.background = 'var(--success)';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '';
+      e.target.reset();
+    }, 2500);
+  };
+
+  // ========================
+  // LOADER
+  // ========================
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('done');
+    }, 2000);
+  });
+
+  // ========================
+  // SCROLL REVEAL
+  // ========================
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ========================
+  // NAV SCROLL
+  // ========================
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    const current = window.scrollY;
+    if (current > 80) {
+      nav.style.background = 'rgba(3,3,5,0.92)';
+      nav.style.backdropFilter = 'blur(24px)';
+    } else {
+      nav.style.background = 'rgba(3,3,5,0.6)';
+      nav.style.backdropFilter = 'blur(20px)';
+    }
+    lastScroll = current;
+  });
+
+  // ========================
+  // THEME SWITCHER
+  // ========================
+  window.setTheme = function(theme) {
+    document.body.classList.remove('theme-warm', 'theme-cyber');
+    if (theme === 'warm') document.body.classList.add('theme-warm');
+    if (theme === 'cyber') document.body.classList.add('theme-cyber');
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.theme-btn[data-theme="${theme}"]`).classList.add('active');
+    localStorage.setItem('harsh-theme', theme);
+  };
+  const savedTheme = localStorage.getItem('harsh-theme') || 'default';
+  setTheme(savedTheme);
+
+  // ========================
+  // MOBILE MENU
+  // ========================
+  window.toggleMobileMenu = function() {
+    const links = document.querySelector('.nav-links');
+    if (links.style.display === 'flex') {
+      links.style.display = 'none';
+    } else {
+      links.style.display = 'flex';
+      links.style.flexDirection = 'column';
+      links.style.position = 'absolute';
+      links.style.top = '60px';
+      links.style.left = '0';
+      links.style.right = '0';
+      links.style.background = 'rgba(3,3,5,0.95)';
+      links.style.backdropFilter = 'blur(20px)';
+      links.style.padding = '20px';
+      links.style.borderBottom = '1px solid var(--border)';
+      links.style.gap = '16px';
+    }
+  };
+
+  // ========================
+  // THREE.JS BRAIN / NEURAL NETWORK
+  // ========================
+  const canvas = document.getElementById('brain-canvas');
+  const scene = new THREE.Scene();
+  scene.background = null; // transparent
+  scene.fog = new THREE.FogExp2(0x030305, 0.035);
+
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 5.5);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  const controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.8;
+  controls.enableZoom = false;
+  controls.enablePan = false;
+  controls.minDistance = 3.5;
+  controls.maxDistance = 8;
+
+  // Lights
+  const ambient = new THREE.AmbientLight(0x404080, 0.5);
+  scene.add(ambient);
+
+  const pointLight = new THREE.PointLight(0x6366f1, 8, 20);
+  pointLight.position.set(3, 3, 3);
+  scene.add(pointLight);
+
+  const pointLight2 = new THREE.PointLight(0xec4899, 5, 20);
+  pointLight2.position.set(-3, -2, 4);
+  scene.add(pointLight2);
+
+  // === BRAIN / NEURAL GEOMETRY ===
+  const brainGroup = new THREE.Group();
+  scene.add(brainGroup);
+
+  // Create neural nodes in a brain-like distribution
+  const nodeCount = 180;
+  const nodes = [];
+  const nodeGeo = new THREE.SphereGeometry(0.04, 8, 8);
+
+  for (let i = 0; i < nodeCount; i++) {
+    // Brain-like distribution using modified sphere
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const r = 1.8 + Math.random() * 0.6;
+
+    // Flatten to make it brain-shaped
+    const x = r * Math.sin(phi) * Math.cos(theta) * 0.8;
+    const y = r * Math.sin(phi) * Math.sin(theta) * 0.9;
+    const z = r * Math.cos(phi) * 1.1;
+
+    const color = new THREE.Color();
+    color.setHSL(0.65 + Math.random() * 0.15, 0.8, 0.6);
+
+    const mat = new THREE.MeshStandardMaterial({
+      color: color,
+      emissive: color,
+      emissiveIntensity: 2,
+      roughness: 0.2,
+      metalness: 0.8
+    });
+
+    const mesh = new THREE.Mesh(nodeGeo, mat);
+    mesh.position.set(x, y, z);
+    mesh.userData = {
+      originalPos: new THREE.Vector3(x, y, z),
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.3 + Math.random() * 0.5
+    };
+    brainGroup.add(mesh);
+    nodes.push(mesh);
+  }
+
+  // === CONNECTIONS (Synapses) ===
+  const lineMat = new THREE.LineBasicMaterial({
+    color: 0x6366f1,
+    transparent: true,
+    opacity: 0.15
+  });
+
+  const connections = [];
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dist = nodes[i].position.distanceTo(nodes[j].position);
+      if (dist < 0.8 && Math.random() > 0.7) {
+        const geo = new THREE.BufferGeometry().setFromPoints([
+          nodes[i].position.clone(),
+          nodes[j].position.clone()
+        ]);
+        const line = new THREE.Line(geo, lineMat.clone());
+        brainGroup.add(line);
+        connections.push({
+          line,
+          nodeA: nodes[i],
+          nodeB: nodes[j],
+          pulsePhase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+  }
+
+  // === ELECTRIC PULSE PARTICLES ===
+  const pulseCount = 40;
+  const pulseGeo = new THREE.SphereGeometry(0.025, 6, 6);
+  const pulseMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.9
+  });
+
+  const pulses = [];
+  for (let i = 0; i < pulseCount; i++) {
+    const mesh = new THREE.Mesh(pulseGeo, pulseMat.clone());
+    mesh.visible = false;
+    brainGroup.add(mesh);
+    pulses.push({
+      mesh,
+      connection: connections[Math.floor(Math.random() * connections.length)],
+      progress: 0,
+      speed: 0.3 + Math.random() * 0.4,
+      active: false,
+      delay: Math.random() * 3
+    });
+  }
+
+  // === COMPUTE ATOMS (Orbiting particles) ===
+  const atomCount = 60;
+  const atomGeo = new THREE.SphereGeometry(0.02, 6, 6);
+  const atoms = [];
+
+  for (let i = 0; i < atomCount; i++) {
+    const mat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color().setHSL(0.6 + Math.random() * 0.2, 0.9, 0.7),
+      transparent: true,
+      opacity: 0.6
+    });
+    const mesh = new THREE.Mesh(atomGeo, mat);
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 2.5 + Math.random() * 2;
+    const yOffset = (Math.random() - 0.5) * 3;
+    mesh.position.set(
+      Math.cos(angle) * radius,
+      yOffset,
+      Math.sin(angle) * radius
+    );
+    mesh.userData = {
+      angle,
+      radius,
+      yOffset,
+      speed: 0.1 + Math.random() * 0.3,
+      ySpeed: 0.2 + Math.random() * 0.3
+    };
+    scene.add(mesh);
+    atoms.push(mesh);
+  }
+
+  // === GLOW CORE ===
+  const coreGeo = new THREE.SphereGeometry(0.3, 32, 32);
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: 0x6366f1,
+    transparent: true,
+    opacity: 0.08
+  });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  scene.add(core);
+
+  const coreLight = new THREE.PointLight(0x6366f1, 3, 8);
+  coreLight.position.set(0, 0, 0);
+  scene.add(coreLight);
+
+  // === MOUSE INTERACTION ===
+  const mouse = new THREE.Vector2();
+  const raycaster = new THREE.Raycaster();
+  let hoveredNode = null;
+
+  canvas.addEventListener('mousemove', (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(nodes);
+    if (intersects.length > 0) {
+      const node = intersects[0].object;
+      if (hoveredNode !== node) {
+        if (hoveredNode) {
+          hoveredNode.scale.set(1, 1, 1);
+          hoveredNode.material.emissiveIntensity = 2;
+        }
+        hoveredNode = node;
+        node.scale.set(2.5, 2.5, 2.5);
+        node.material.emissiveIntensity = 5;
+      }
+    } else if (hoveredNode) {
+      hoveredNode.scale.set(1, 1, 1);
+      hoveredNode.material.emissiveIntensity = 2;
+      hoveredNode = null;
+    }
+  });
+
+  // === ANIMATION LOOP ===
+  const clock = new THREE.Clock();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const time = clock.getElapsedTime();
+    const delta = clock.getDelta();
+
+    controls.update();
+
+    // Pulse nodes
+    nodes.forEach(node => {
+      const ud = node.userData;
+      const breathe = Math.sin(time * ud.speed + ud.phase) * 0.08;
+      node.position.copy(ud.originalPos).multiplyScalar(1 + breathe * 0.1);
+    });
+
+    // Update connection lines
+    connections.forEach(conn => {
+      const positions = conn.line.geometry.attributes.position.array;
+      positions[0] = conn.nodeA.position.x;
+      positions[1] = conn.nodeA.position.y;
+      positions[2] = conn.nodeA.position.z;
+      positions[3] = conn.nodeB.position.x;
+      positions[4] = conn.nodeB.position.y;
+      positions[5] = conn.nodeB.position.z;
+      conn.line.geometry.attributes.position.needsUpdate = true;
+
+      // Pulse opacity
+      const pulse = Math.sin(time * 2 + conn.pulsePhase) * 0.5 + 0.5;
+      conn.line.material.opacity = 0.08 + pulse * 0.12;
+    });
+
+    // Electric pulses traveling along connections
+    pulses.forEach(p => {
+      if (!p.active) {
+        p.delay -= 0.016;
+        if (p.delay <= 0) {
+          p.active = true;
+          p.progress = 0;
+          p.connection = connections[Math.floor(Math.random() * connections.length)];
+        }
+        return;
+      }
+
+      p.progress += p.speed * 0.016;
+      if (p.progress >= 1) {
+        p.active = false;
+        p.delay = 0.5 + Math.random() * 2;
+        p.mesh.visible = false;
+        return;
+      }
+
+      p.mesh.visible = true;
+      const a = p.connection.nodeA.position;
+      const b = p.connection.nodeB.position;
+      p.mesh.position.lerpVectors(a, b, p.progress);
+      p.mesh.material.opacity = Math.sin(p.progress * Math.PI) * 0.9;
+    });
+
+    // Compute atoms orbit
+    atoms.forEach(atom => {
+      const ud = atom.userData;
+      ud.angle += ud.speed * 0.008;
+      atom.position.x = Math.cos(ud.angle) * ud.radius;
+      atom.position.z = Math.sin(ud.angle) * ud.radius;
+      atom.position.y = ud.yOffset + Math.sin(time * ud.ySpeed) * 0.5;
+    });
+
+    // Core glow pulse
+    const corePulse = Math.sin(time * 1.5) * 0.03;
+    core.scale.set(1 + corePulse, 1 + corePulse, 1 + corePulse);
+    coreLight.intensity = 2 + Math.sin(time * 2) * 1;
+
+    // Brain group gentle float
+    brainGroup.rotation.y = Math.sin(time * 0.1) * 0.1;
+    brainGroup.position.y = Math.sin(time * 0.3) * 0.15;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // === RESIZE ===
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+
+</body>
+</html>

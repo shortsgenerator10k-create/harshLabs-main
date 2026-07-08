@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HARSHLABS.AI // INDUSTRIAL SPEC SHEET [LIVE TELEMETRY]</title>
+    
+    <!-- Heavy Monospace & Brutalist Grotesk Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Syne:wght@800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        brutal: ['"Syne"', 'sans-serif'],
+                    },
+                    colors: {
+                        void: '#050505',
+                        acid: '#00ff66',
+                        steel: '#141414',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            overflow-x: hidden;
+        }
+        /* Engineering Wireframe Grid */
+        .grid-bg {
+            background-size: 24px 24px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+
+        /* 1. TELEMETRY SCANLINE ANIMATION */
+        @keyframes scanline {
+            0% { top: -10%; opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { top: 110%; opacity: 0; }
+        }
+        .laser-scan {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #00ff66;
+            box-shadow: 0 0 15px 3px rgba(0, 255, 102, 0.6);
+            animation: scanline 6s linear infinite;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* 2. ELECTRICAL FLICKER */
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 1; }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.4; }
+        }
+        .animate-flicker {
+            animation: flicker 4s infinite;
+        }
+
+        /* 3. HARDWARE SWITCH HOVER SNAP */
+        .hardware-snap {
+            transition: transform 0.07s ease, box-shadow 0.07s ease, background-color 0.15s ease;
+        }
+        .hardware-snap:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 4px 4px 0px 0px #00ff66;
+            background-color: #141414;
+        }
+
+        /* 4. BLINKING TERMINAL CURSOR */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .cursor-blink::after {
+            content: '█';
+            color: #00ff66;
+            animation: blink 1s infinite;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body class="grid-bg min-h-screen p-6 md:p-12 flex flex-col justify-between border-8 border-acid select-none relative">
+
+    <!-- ACTIVE LASER SCANLINE OVERLAY -->
+    <div class="laser-scan"></div>
+
+    <!-- TOP META METRICS -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-white/20 pb-6 gap-4 font-mono text-xs text-neutral-400 uppercase tracking-widest relative z-10">
+        <div class="flex items-center space-x-3">
+            <span class="inline-block w-3 h-3 bg-acid animate-ping"></span>
+            <span class="text-white font-bold tracking-widest">SYS_STATUS: DETERMINISTIC // ONLINE</span>
+        </div>
+        <div>
+            <span class="text-neutral-500">LATENCY:</span> <span id="ping-timer" class="text-acid font-bold">12ms</span> // LOC: DELHI, IN
+        </div>
+        <div class="text-acid font-extrabold bg-acid/10 px-3 py-1 border border-acid/30">
+            [ ARCHITECT_ID: HARSH KUMAR ]
+        </div>
+    </header>
+
+    <!-- MAIN BRUTALIST IDENTIFIER -->
+    <main class="my-12 relative z-10">
+        <div class="border-l-4 border-acid pl-4 mb-4 text-neutral-400 font-mono text-xs md:text-sm uppercase tracking-widest flex items-center gap-2">
+            <span>// ELIMINATING INDETERMINISTIC HUMAN FRICTION</span>
+            <span class="text-xs text-acid bg-acid/20 px-1.5 py-0.5 font-bold">v3.4.0</span>
+        </div>
+        
+        <h1 class="animate-flicker font-brutal text-6xl sm:text-8xl md:text-9xl font-extrabold tracking-tighter text-white uppercase leading-none mb-6">
+            HARSH<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-500 to-neutral-800">LABS.AI</span>
+        </h1>
+
+        <p class="font-mono text-lg md:text-2xl text-neutral-300 max-w-3xl leading-tight border-t-2 border-white/20 pt-6">
+            We do not write passive software. We architect <span class="text-acid font-bold underline decoration-acid decoration-2 underline-offset-4">autonomous digital workforces</span>. Replacing scale-limiting operational bottlenecks with zero-latency execution.
+        </p>
+
+        <!-- RAW SYSTEM ARCHITECTURE MATRIX -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
+            
+            <!-- Module 1: Extraction -->
+            <div class="hardware-snap p-6 md:p-8 border-2 border-white/30 bg-void flex flex-col justify-between">
+                <div>
+                    <div class="text-acid font-mono text-sm font-bold mb-4 flex justify-between items-center border-b border-white/10 pb-2">
+                        <span>[MOD_01 // HARVEST]</span>
+                        <span class="text-xs bg-white/10 px-1 text-white">ACTIVE</span>
+                    </div>
+                    <h3 class="font-brutal text-xl font-bold text-white uppercase mb-2">Extraction Engines</h3>
+                    <p class="font-mono text-xs text-neutral-400 leading-relaxed">
+                        Multi-threaded scraping architectures engineered to bypass complex anti-bot mitigation and harvest proprietary market intelligence at scale.
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-white/10 font-mono text-xs text-neutral-300 uppercase font-bold flex justify-between items-center">
+                    <span>OUTPUT:</span>
+                    <span class="text-acid text-base font-extrabold"><span class="counter" data-target="10000">0</span>+ / WK</span>
+                </div>
+            </div>
+
+            <!-- Module 2: LLM Integration -->
+            <div class="hardware-snap p-6 md:p-8 border-2 border-white/30 bg-void flex flex-col justify-between">
+                <div>
+                    <div class="text-acid font-mono text-sm font-bold mb-4 flex justify-between items-center border-b border-white/10 pb-2">
+                        <span>[MOD_02 // COGNITION]</span>
+                        <span class="text-xs bg-white/10 px-1 text-white">LOCAL+CLOUD</span>
+                    </div>
+                    <h3 class="font-brutal text-xl font-bold text-white uppercase mb-2">LLM Core Integration</h3>
+                    <p class="font-mono text-xs text-neutral-400 leading-relaxed">
+                        Deterministic AI agents bound directly to custom business logic. Zero hallucinations. Pure, structured JSON output execution.
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-white/10 font-mono text-xs text-neutral-300 uppercase font-bold flex justify-between items-center">
+                    <span>EXECUTION:</span>
+                    <span class="text-acid text-base font-extrabold">&lt; <span class="counter" data-target="200">0</span> MS</span>
+                </div>
+            </div>
+
+            <!-- Module 3: Velocity -->
+            <div class="hardware-snap p-6 md:p-8 border-2 border-white/30 bg-void flex flex-col justify-between">
+                <div>
+                    <div class="text-acid font-mono text-sm font-bold mb-4 flex justify-between items-center border-b border-white/10 pb-2">
+                        <span>[MOD_03 // VELOCITY]</span>
+                        <span class="text-xs bg-white/10 px-1 text-white">24/7/365</span>
+                    </div>
+                    <h3 class="font-brutal text-xl font-bold text-white uppercase mb-2">Systematic Autonomy</h3>
+                    <p class="font-mono text-xs text-neutral-400 leading-relaxed">
+                        Complete eradication of manual onboarding, data sorting, and administrative drag. Your operational pipeline running without human fatigue.
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-white/10 font-mono text-xs text-neutral-300 uppercase font-bold flex justify-between items-center">
+                    <span>EFFICIENCY:</span>
+                    <span class="text-acid text-base font-extrabold"><span class="counter-float" data-target="99.8">0</span>%</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- TERMINAL COMMAND CTA -->
+    <footer class="border-t-2 border-white/20 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 relative z-10">
+        <div class="font-mono text-xs text-neutral-500 max-w-md">
+            <p class="text-white font-bold mb-1">// PROPRIETARY ARCHITECTURE</p>
+            <p>Deployment of these systems requires an uncompromising operational audit. We do not service traditional retail businesses.</p>
+        </div>
+
+        <div class="w-full md:w-auto flex flex-col sm:flex-row items-stretch gap-0 border-2 border-acid bg-void shadow-[4px_4px_0px_0px_rgba(0,255,102,0.3)]">
+            <div class="px-6 py-4 font-mono text-sm text-neutral-400 flex items-center bg-steel border-b sm:border-b-0 sm:border-r border-acid/40">
+                <span class="text-acid font-bold mr-2">&gt;</span> <span class="cursor-blink text-white">harshlabs.ai/initiate</span>
+            </div>
+            <a href="https://harshlabs.ai" class="px-8 py-4 bg-acid hover:bg-white text-void font-mono font-black text-sm uppercase tracking-wider text-center transition-colors flex items-center justify-center">
+                EXECUTE AUDIT →
+            </a>
+        </div>
+    </footer>
+
+    <!-- LIVE TELEMETRY JS ENGINE -->
+    <script>
+        // 1. Live Ping Simulation
+        setInterval(() => {
+            const ping = Math.floor(Math.random() * (18 - 8 + 1)) + 8;
+            document.getElementById('ping-timer').innerText = `${ping}ms`;
+        }, 2000);
+
+        // 2. Deterministic Number Counter Animation on Load
+        const animateCounters = () => {
+            // Integer Counters
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const duration = 1500; // 1.5 seconds
+                const step = target / (duration / 16);
+                let current = 0;
+
+                const updateCounter = () => {
+                    current += step;
+                    if (current < target) {
+                        counter.innerText = Math.ceil(current).toLocaleString();
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.innerText = target.toLocaleString();
+                    }
+                };
+                updateCounter();
+            });
+
+            // Float Counter (for 99.8%)
+            const floatCounters = document.querySelectorAll('.counter-float');
+            floatCounters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                let current = 0.0;
+                const step = target / 60;
+
+                const updateFloat = () => {
+                    current += step;
+                    if (current < target) {
+                        counter.innerText = current.toFixed(1);
+                        requestAnimationFrame(updateFloat);
+                    } else {
+                        counter.innerText = target.toFixed(1);
+                    }
+                };
+                updateFloat();
+            });
+        };
+
+        // Trigger counters when DOM is ready
+        window.addEventListener('DOMContentLoaded', animateCounters);
+    </script>
+</body>
+</html>

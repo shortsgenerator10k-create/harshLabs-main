@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>IMPHI · You Earn. We Work.</title>
+    <!-- Fonts & GSAP -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0B0B0F;
+            color: white;
+            overflow-x: hidden;
+        }
+        /* Scroll snapping */
+        .section {
+            height: 100vh;
+            width: 100%;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 2rem;
+        }
+        .snap-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+            scroll-behavior: smooth;
+        }
+        /* Dot navigation */
+        .dot-nav {
+            position: fixed;
+            right: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .dot.active {
+            background: #FF6A00;
+            width: 14px;
+            height: 14px;
+            box-shadow: 0 0 12px #FF6A00;
+        }
+        /* Typography */
+        h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            text-align: center;
+            letter-spacing: -0.02em;
+        }
+        .sub {
+            color: #aaa;
+            font-size: 1.1rem;
+        }
+        /* Scene 1 Hero */
+        .hero-line {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .orange-text {
+            color: #FF6A00;
+            text-shadow: 0 0 20px rgba(255,106,0,0.5);
+        }
+        /* Scene 2 Factory */
+        .factory-grid {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .worker-card {
+            background: #1A1A1F;
+            border-radius: 32px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            width: 150px;
+            animation: bob 0.8s infinite alternate ease-in-out;
+        }
+        .worker-emoji {
+            font-size: 4rem;
+            display: block;
+        }
+        @keyframes bob {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-12px); }
+        }
+        .belt {
+            background: #2A2A30;
+            height: 8px;
+            width: 80%;
+            margin: 2rem auto;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .belt-line {
+            width: 50%;
+            height: 100%;
+            background: repeating-linear-gradient(90deg, #FF6A00, #FF6A00 20px, #FFA040 20px, #FFA040 40px);
+            animation: slide 1s linear infinite;
+        }
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(100%); }
+        }
+        .box-item {
+            background: #FF6A00;
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            position: absolute;
+            animation: moveBox 4s infinite linear;
+        }
+        /* Scene 3 Platforms */
+        .platform-row {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .platform {
+            background: #1E1E24;
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1.3rem;
+            backdrop-filter: blur(4px);
+        }
+        .dashed-line-anim {
+            stroke: #FF6A00;
+            stroke-width: 3;
+            stroke-dasharray: 8;
+            animation: dash 0.6s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -16; }
+        }
+        /* Scene 4 Money */
+        .counter {
+            font-size: 5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FF6A00, #FFB347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 1rem 0;
+        }
+        .coin {
+            position: absolute;
+            font-size: 30px;
+            pointer-events: none;
+            animation: fall 2s linear forwards;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-20vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        /* Scene 5 Delivery */
+        .delivery-scene {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .truck-animate {
+            font-size: 5rem;
+            animation: drive 4s infinite alternate ease-in-out;
+        }
+        @keyframes drive {
+            0% { transform: translateX(-40vw); }
+            100% { transform: translateX(40vw); }
+        }
+        .confetti-bit {
+            position: absolute;
+            width: 8px;
+            height: 16px;
+            background: #FF6A00;
+            top: 0;
+            animation: confettiDrop 2s infinite;
+        }
+        /* Scene 6 CTA */
+        .cta-buttons {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-wa {
+            background: #25D366;
+            color: white;
+        }
+        .btn-call {
+            background: white;
+            color: #0B0B0F;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .scene6 {
+            background: radial-gradient(circle at 30% 10%, #FF6A00, #D45400);
+        }
+        @media (max-width: 700px) {
+            h2 { font-size: 2rem; }
+            .hero-line { font-size: 2.8rem; }
+            .counter { font-size: 3rem; }
+            .btn { padding: 0.7rem 1.5rem; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="snap-container">
+    <!-- Section 1 Hero -->
+    <section class="section" id="hero">
+        <div class="hero-line"><span class="word-animate">You</span> <span class="word-animate">Earn.</span></div>
+        <div class="hero-line"><span class="word-animate">We</span> <span class="word-animate orange-text">Work.</span></div>
+        <p class="sub" style="margin-top: 2rem;">Scroll to see how ➔</p>
+    </section>
+
+    <!-- Section 2 Factory -->
+    <section class="section" id="factory">
+        <h2>⚙️ Always working for you</h2>
+        <div class="factory-grid">
+            <div class="worker-card"><span class="worker-emoji">👷‍♂️</span><span>Packer</span></div>
+            <div class="worker-card"><span class="worker-emoji">📦</span><span>Shipper</span></div>
+            <div class="worker-card"><span class="worker-emoji">✅</span><span>Quality</span></div>
+        </div>
+        <div class="belt"><div class="belt-line"></div></div>
+        <div style="position: relative; width: 100%; height: 60px;">
+            <div id="movingBox" style="position: absolute; left: -60px; width: 50px; height: 50px; background: #FF6A00; border-radius: 8px;"></div>
+            <div id="check1" style="position: absolute; left: 30%; top: -20px; font-size: 28px; opacity: 0;">✅</div>
+            <div id="check2" style="position: absolute; left: 70%; top: -20px; font-size: 28px; opacity: 0;">✅</div>
+        </div>
+    </section>
+
+    <!-- Section 3 Platforms -->
+    <section class="section" id="platforms">
+        <h2>📦 Sells on every channel</h2>
+        <div class="platform-row">
+            <div class="platform">Amazon</div>
+            <div class="platform">Flipkart</div>
+            <div class="platform">Meesho</div>
+        </div>
+        <svg width="400" height="200" viewBox="0 0 400 200" style="position: absolute; bottom: 15%; left: 5%; pointer-events: none;">
+            <line x1="50" y1="100" x2="180" y2="100" class="dashed-line-anim" />
+            <line x1="120" y1="130" x2="250" y2="150" class="dashed-line-anim" />
+            <line x1="200" y1="80" x2="340" y2="80" class="dashed-line-anim" />
+        </svg>
+        <div id="flyingBoxPlatform" class="flying-box" style="position: absolute; width: 45px; height: 45px; background: #FF6A00; border-radius: 12px; display: none;"></div>
+    </section>
+
+    <!-- Section 4 Money Counter -->
+    <section class="section" id="money">
+        <h2>💰 Your passive income</h2>
+        <div class="counter" id="counterDisplay">₹0</div>
+        <p class="sub">Earnings last month for IMPHI sellers</p>
+        <div id="coinRainContainer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none;"></div>
+    </section>
+
+    <!-- Section 5 Delivery -->
+    <section class="section" id="delivery">
+        <h2>🚚 Fast & reliable</h2>
+        <div class="delivery-scene">
+            <div class="truck-animate">🚛</div>
+            <div id="packageDrop" style="font-size: 2rem; margin: 1rem;">📦</div>
+            <div id="happyCustomer" style="font-size: 3rem; opacity: 0;">😊</div>
+        </div>
+        <div id="confettiArea"></div>
+    </section>
+
+    <!-- Section 6 CTA -->
+    <section class="section scene6" id="cta">
+        <h2 style="color: white;">Ready to scale?</h2>
+        <div class="cta-buttons">
+            <a href="https://wa.me/919876543210?text=Hi%20IMPHI%2C%20I%20want%20to%20earn%20passively" class="btn btn-wa" target="_blank">WhatsApp</a>
+            <a href="tel:+919876543210" class="btn btn-call">Call Now</a>
+        </div>
+        <p class="sub" style="margin-top: 2rem; color: rgba(255,255,240,0.9);">Zero investment · Zero hassle</p>
+    </section>
+</div>
+
+<div class="dot-nav" id="dotNav"></div>
+
+<script>
+    gsap.registerPlugin(ScrollTrigger);
+    const sections = document.querySelectorAll('.section');
+    const snapContainer = document.querySelector('.snap-container');
+    
+    // Build dots
+    const dotNav = document.getElementById('dotNav');
+    sections.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        dot.dataset.index = idx;
+        dot.addEventListener('click', () => {
+            sections[idx].scrollIntoView({ behavior: 'smooth' });
+        });
+        dotNav.appendChild(dot);
+    });
+    const dots = document.querySelectorAll('.dot');
+
+    // Update active dot on scroll
+    function updateActiveDot() {
+        let scrollPos = snapContainer.scrollTop;
+        let windowHeight = window.innerHeight;
+        sections.forEach((sec, i) => {
+            const offsetTop = sec.offsetTop;
+            if (scrollPos >= offsetTop - windowHeight/2) {
+                dots.forEach(d => d.classList.remove('active'));
+                if (dots[i]) dots[i].classList.add('active');
+            }
+        });
+    }
+    snapContainer.addEventListener('scroll', updateActiveDot);
+    updateActiveDot();
+
+    // --- GSAP ScrollTrigger animations per scene ---
+    // Scene 1: word-by-word boom
+    gsap.fromTo(".word-animate", 
+        { opacity: 0, scale: 0.3, filter: "blur(8px)" },
+        { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.6, stagger: 0.2, ease: "back.out(1.2)", scrollTrigger: { trigger: "#hero", start: "top 70%", toggleActions: "play none none reverse" } }
+    );
+    // Orange burst after each word
+    gsap.to(".orange-text", { textShadow: "0 0 25px #FF6A00", repeat: 2, yoyo: true, duration: 0.3, delay: 1, scrollTrigger: "#hero" });
+
+    // Scene 2: Factory belt and boxes
+    gsap.to("#movingBox", { x: 600, duration: 3, repeat: -1, ease: "linear", scrollTrigger: { trigger: "#factory", start: "top 80%", toggleActions: "play none none reset" } });
+    gsap.to("#check1", { opacity: 1, scale: 1.2, duration: 0.5, delay: 1.5, repeat: -1, repeatDelay: 2, scrollTrigger: "#factory" });
+    gsap.to("#check2", { opacity: 1, scale: 1.2, duration: 0.5, delay: 2.5, repeat: -1, repeatDelay: 2, scrollTrigger: "#factory" });
+
+    // Scene 3: Flying boxes toward platforms
+    let flyingBox = document.getElementById('flyingBoxPlatform');
+    const platforms = document.querySelectorAll('.platform');
+    let platformIndex = 0;
+    let flyingInterval;
+    ScrollTrigger.create({
+        trigger: "#platforms",
+        start: "top 70%",
+        onEnter: () => {
+            if(flyingInterval) clearInterval(flyingInterval);
+            flyingBox.style.display = "block";
+            flyingInterval = setInterval(() => {
+                const target = platforms[platformIndex % platforms.length];
+                const targetRect = target.getBoundingClientRect();
+                const startX = window.innerWidth/2 - 25;
+                const startY = window.innerHeight/2 - 25;
+                gsap.set(flyingBox, { left: startX, top: startY });
+                gsap.to(flyingBox, { 
+                    left: targetRect.left + targetRect.width/2 - 20, 
+                    top: targetRect.top + targetRect.height/2 - 20, 
+                    rotation: 720, duration: 1, ease: "power2.in", 
+                    onComplete: () => gsap.set(flyingBox, { left: startX, top: startY, rotation: 0 })
+                });
+                platformIndex++;
+            }, 1800);
+        },
+        onLeave: () => clearInterval(flyingInterval),
+        onLeaveBack: () => clearInterval(flyingInterval)
+    });
+
+    // Scene 4: Money counter + coins
+    let counterRunning = false;
+    let counterInterval;
+    function startCounter() {
+        if(counterRunning) return;
+        counterRunning = true;
+        let val = 0;
+        const counterEl = document.getElementById('counterDisplay');
+        counterInterval = setInterval(() => {
+            if(val >= 42000) val = 0;
+            else val += Math.floor(Math.random() * 800) + 400;
+            if(val > 42000) val = 42000;
+            counterEl.innerText = '₹' + val.toLocaleString('en-IN');
+        }, 90);
+        // coin rain
+        const rainContainer = document.getElementById('coinRainContainer');
+        function addCoin() {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            coin.innerHTML = '🪙';
+            coin.style.left = Math.random() * 90 + '%';
+            coin.style.animationDuration = 1.2 + Math.random() * 1.5 + 's';
+            rainContainer.appendChild(coin);
+            setTimeout(() => coin.remove(), 2500);
+        }
+        const coinRainInterval = setInterval(addCoin, 280);
+        ScrollTrigger.create({ trigger: "#money", onLeave: () => { clearInterval(counterInterval); clearInterval(coinRainInterval); counterRunning=false; }, onLeaveBack: () => startCounter() });
+    }
+    ScrollTrigger.create({ trigger: "#money", start: "top 70%", onEnter: startCounter });
+
+    // Scene 5: Delivery truck, package drop, happy customer & confetti
+    ScrollTrigger.create({
+        trigger: "#delivery",
+        start: "top 70%",
+        onEnter: () => {
+            gsap.fromTo(".truck-animate", { x: -300 }, { x: 300, repeat: -1, duration: 3, repeatDelay: 0, ease: "power1.inOut" });
+            gsap.to("#packageDrop", { y: 60, opacity: 0, duration: 0.8, repeat: -1, repeatDelay: 2.5, yoyo: true });
+            gsap.to("#happyCustomer", { opacity: 1, scale: 1.3, duration: 0.5, repeat: -1, repeatDelay: 2, yoyo: true });
+            // confetti burst
+            const confArea = document.getElementById('confettiArea');
+            function burst() {
+                for(let i=0;i<40;i++) {
+                    let conf = document.createElement('div');
+                    conf.classList.add('confetti-bit');
+                    conf.style.left = Math.random() * 100 + '%';
+                    conf.style.top = '-10px';
+                    conf.style.animation = `confettiDrop ${0.8+Math.random()}s linear forwards`;
+                    conf.style.background = `hsl(${Math.random()*30 + 20}, 100%, 55%)`;
+                    confArea.appendChild(conf);
+                    setTimeout(() => conf.remove(), 1500);
+                }
+            }
+            setInterval(burst, 2200);
+        }
+    });
+    // extra confetti keyframes
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `@keyframes confettiDrop { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(200px) rotate(720deg); opacity: 0; } }`;
+    document.head.appendChild(styleSheet);
+
+    // Scene 6: CTA pulse
+    ScrollTrigger.create({ trigger: "#cta", start: "top 80%", onEnter: () => gsap.to(".btn", { scale: 1.05, duration: 0.6, repeat: -1, yoyo: true, stagger: 0.2 }) });
+</script>
+</body>
+</html>
