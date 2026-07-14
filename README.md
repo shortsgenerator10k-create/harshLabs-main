@@ -1,6 +1,6 @@
 # ⚡ HarshLabs Showcase: Real-Time Solutions & Cycle Acceleration 
 
-> *"If you think a degree teaches you more than your curiosity of doing something or self-educating, you are already paralyzed by the Matrix."*
+> *"If you think a degree teaches you more than your curiosity of doing something or self-educating, your mind already paralyzed by the Matrix."*
 
 ---
 
